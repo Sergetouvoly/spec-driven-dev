@@ -19,7 +19,7 @@ You need `templates/` from this repository. If you are not already running
 inside a clone:
 
 ```bash
-git clone --depth 1 https://github.com/<you>/specloop /tmp/specloop
+git clone --depth 1 https://github.com/Sergetouvoly/spec-driven-dev /tmp/specloop
 ```
 
 If you cannot run git or reach the network, say so and stop. Do not reconstruct

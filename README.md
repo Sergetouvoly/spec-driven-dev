@@ -39,14 +39,14 @@ reviewer subagent is read-only and has not seen the reasoning behind the diff.
 Point your coding agent at the setup guide:
 
 ```
-Read SETUP.md from https://github.com/<you>/specloop and set this project up.
+Read SETUP.md from https://github.com/Sergetouvoly/spec-driven-dev and set this project up.
 ```
 
 It will detect which agent you are running, ask about five questions, and write
 the files in that agent's native format. Or copy a prebuilt folder yourself:
 
 ```bash
-git clone https://github.com/<you>/specloop /tmp/specloop
+git clone https://github.com/Sergetouvoly/spec-driven-dev /tmp/specloop
 cp -r /tmp/specloop/dist/claude-code/. .     # or kilo-code, opencode, cursor, copilot
 ```
 
