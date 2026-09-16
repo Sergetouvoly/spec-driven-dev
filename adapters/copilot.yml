@@ -1,0 +1,85 @@
+# GitHub Copilot. Commands become prompt files the user opens, the skill
+# becomes an instructions file, and agents exist but carry no permission model.
+# Nothing here is enforced.
+id: copilot
+name: GitHub Copilot
+pivot: false
+dist: dist/copilot
+
+paths:
+  commands: .github/prompts/{name}.prompt.md
+  skills: .github/instructions/{name}.instructions.md
+  agents: .github/agents/{name}.md
+  rules: .github/copilot-instructions.md
+
+arguments:
+  syntax: null
+  fallback: the text the user typed after the command name
+
+frontmatter:
+  commands:
+    keep: [description, model]
+    rename: {}
+    drop: [agent]
+    add:
+      mode: agent
+    compensate:
+      agent: >-
+        Before starting, read `.github/agents/{value}.md` and follow its rules
+        and restrictions for the whole of this prompt.
+  agents:
+    keep: [description, model]
+    rename: {}
+    drop: [mode, temperature, permission]
+    add: {}
+    compensate:
+      permission: >-
+        Copilot cannot enforce these limits. The restrictions in this file are
+        rules you follow, not walls. Nothing stops a tool call that breaks one.
+      mode: >-
+        Copilot agent files are selected, not spawned. A reviewer must be run
+        as its own request so it does not inherit the implementation reasoning.
+  skills:
+    keep: [name, description]
+    rename: {}
+    drop: []
+    add:
+      applyTo: "**"
+    compensate: {}
+
+supported_extras:
+  commands: [mode, tools, model]
+  agents: [tools, model]
+  skills: [applyTo]
+
+permissions:
+  model: none
+  field: null
+  location: null
+  enforced: false
+  granularity: null
+  tool_map: null
+
+enforces:
+  - nothing
+
+advisory:
+  - spec-writer cannot touch source files
+  - spec-writer runs no shell command beyond read-only git
+  - reviewer never edits or writes
+  - reviewer bash is limited to git diff, log, show and status
+  - review runs without the reasoning that produced the diff
+
+degrades:
+  - concept: command invocation
+    action: a prompt file the user opens
+    consequence: same content, different trigger
+  - concept: subagent with its own context
+    action: an agent file the user selects for one request
+    consequence: separation depends on the user starting a new request
+  - concept: every permission block
+    action: restated in the prose of the file
+    consequence: advisory only
+  - concept: $ARGUMENTS substitution
+    action: replaced by the arguments.fallback sentence
+    consequence: the model reads the user's text instead of a substituted value

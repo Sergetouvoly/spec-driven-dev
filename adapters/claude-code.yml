@@ -1,0 +1,93 @@
+# Claude Code. Commands and skills map cleanly. The permission model does not:
+# Kilo constrains an action on a path glob, Claude Code allows or omits a whole
+# tool. Path-scoped rules therefore widen, and that is recorded in degrades.
+id: claude-code
+name: Claude Code
+pivot: false
+dist: dist/claude-code
+
+paths:
+  commands: .claude/commands/{name}.md
+  skills: .claude/skills/{name}/SKILL.md
+  agents: .claude/agents/{name}.md
+  rules: CLAUDE.md
+
+arguments:
+  syntax: $ARGUMENTS
+  fallback: null
+
+frontmatter:
+  commands:
+    keep: [description, model]
+    rename: {}
+    # Claude Code command frontmatter has no agent field.
+    drop: [agent]
+    add: {}
+    compensate:
+      agent: >-
+        Follow the operating rules and restrictions of the `{value}` agent,
+        defined in `.claude/agents/{value}.md`.
+  agents:
+    # Claude Code agent frontmatter: name, description, tools, model.
+    keep: [description, model]
+    rename: {}
+    drop: [mode, temperature, permission]
+    add:
+      name: "{name}"
+    compensate:
+      permission: >-
+        Tool access is granted by the `tools` field above. It is a whole-tool
+        allowlist: a tool listed there is usable on any path. Where a restriction
+        stated in this file is narrower than the tool, it is a rule you follow,
+        not a wall the runtime enforces.
+      mode: >-
+        A `subagent` agent is invoked through the Task tool; a `primary` agent
+        is one you adopt in an interactive session, never as a subtask.
+  skills:
+    keep: [name, description]
+    rename: {}
+    drop: []
+    add: {}
+    compensate: {}
+
+supported_extras:
+  commands: [argument-hint, allowed-tools, model, disable-model-invocation]
+  agents: [tools, model]
+  skills: [allowed-tools]
+
+permissions:
+  model: tool-allowlist
+  field: tools
+  location: agent
+  enforced: true
+  granularity: tool
+  # A pivot action is emitted as its tool when any of its values is allow.
+  tool_map:
+    read: Read
+    glob: Glob
+    grep: Grep
+    edit: Edit
+    write: Write
+    webfetch: WebFetch
+    bash: Bash
+    task: Task
+
+enforces:
+  - an agent can only call the tools listed in its tools field
+  - reviewer has no Edit, Write, WebFetch or Task tool at all
+  - subagents run in their own context
+
+advisory:
+  - spec-writer is limited to docs/ by prose; the Edit and Write tools it holds work anywhere
+  - the reviewer bash allowlist of git subcommands is prose; the Bash tool it holds runs anything
+
+degrades:
+  - concept: per-path permission on edit and write
+    action: whole-tool allow, restriction restated in the agent prose
+    consequence: spec-writer can technically write outside docs/
+  - concept: per-command bash allowlist
+    action: whole-tool allow, restriction restated in the agent prose
+    consequence: the git-only limit is a convention, not a refusal
+  - concept: command-level agent binding
+    action: a line in the command body pointing at the agent file
+    consequence: the user or model must honour it; nothing routes automatically

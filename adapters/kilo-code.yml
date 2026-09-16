@@ -1,0 +1,67 @@
+# Kilo Code is the pivot format: templates/ is already written in it.
+# This adapter is the identity transform. It exists so that the build has no
+# special case, and so that "what the pivot means" is written down as data.
+id: kilo-code
+name: Kilo Code
+pivot: true
+dist: dist/kilo-code
+
+# {name} is the file basename, or the directory name for a skill.
+paths:
+  commands: .kilo/commands/{name}.md
+  skills: .kilo/skills/{name}/SKILL.md
+  agents: .kilo/agents/{name}.md
+  rules: AGENTS.md
+
+arguments:
+  syntax: $ARGUMENTS
+  fallback: null
+
+frontmatter:
+  commands:
+    keep: [description, agent, model]
+    rename: {}
+    drop: []
+    add: {}
+    compensate: {}
+  agents:
+    keep: [description, mode, temperature, permission, model]
+    rename: {}
+    drop: []
+    add: {}
+    compensate: {}
+  skills:
+    keep: [name, description]
+    rename: {}
+    drop: []
+    add: {}
+    compensate: {}
+
+# Fields the target accepts but the templates do not set. Listed so an author
+# knows what is available before inventing a field.
+supported_extras:
+  commands: [model]
+  agents: [model]
+  skills: []
+
+permissions:
+  model: action-map        # per-action map, values allow | deny | ask
+  field: permission        # where it lives in the agent frontmatter
+  location: agent          # agent file, not command file
+  enforced: true
+  granularity: path        # per-action AND per-glob, e.g. "docs/*": allow
+  tool_map: null           # identity, no translation needed
+
+# What the target actually refuses at runtime.
+enforces:
+  - spec-writer cannot edit or write outside docs/
+  - spec-writer cannot run a shell command outside the allowed git list
+  - reviewer cannot edit, write, fetch or spawn a subtask
+  - reviewer bash is limited to git diff, log, show and status
+  - subagents run in their own context
+
+# What is only prose the model may ignore.
+advisory:
+  - none
+
+degrades: []

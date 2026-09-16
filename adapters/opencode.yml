@@ -1,0 +1,60 @@
+# opencode. Closest target to the pivot: it has the same per-action permission
+# map. Only the folder names differ, and they are singular.
+id: opencode
+name: opencode
+pivot: false
+dist: dist/opencode
+
+paths:
+  commands: .opencode/command/{name}.md
+  skills: .opencode/skills/{name}/SKILL.md
+  agents: .opencode/agent/{name}.md
+  rules: AGENTS.md
+
+arguments:
+  syntax: $ARGUMENTS
+  fallback: null
+
+frontmatter:
+  commands:
+    keep: [description, agent, model]
+    rename: {}
+    drop: []
+    add: {}
+    compensate: {}
+  agents:
+    keep: [description, mode, temperature, permission, model]
+    rename: {}
+    drop: []
+    add: {}
+    compensate: {}
+  skills:
+    keep: [name, description]
+    rename: {}
+    drop: []
+    add: {}
+    compensate: {}
+
+supported_extras:
+  commands: [model, subtask]
+  agents: [model, tools, disable]
+  skills: []
+
+permissions:
+  model: action-map
+  field: permission
+  location: agent
+  enforced: true
+  granularity: path
+  tool_map: null
+
+enforces:
+  - spec-writer cannot edit or write outside docs/
+  - spec-writer bash is limited to the listed git commands
+  - reviewer cannot edit, write, fetch or spawn a subtask
+  - subagents run in their own context
+
+advisory:
+  - none
+
+degrades: []

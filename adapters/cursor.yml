@@ -1,0 +1,87 @@
+# Cursor. Commands exist, subagents do not, and there is no argument
+# substitution. The skill becomes an agent-requested .mdc rule. Every
+# permission in the templates becomes prose: Cursor enforces nothing.
+id: cursor
+name: Cursor
+pivot: false
+dist: dist/cursor
+
+paths:
+  commands: .cursor/commands/{name}.md
+  skills: .cursor/rules/{name}.mdc
+  # No subagent concept. Agents ship as commands the user starts in a fresh
+  # chat, which keeps the separate-context property manual but real.
+  agents: .cursor/commands/{name}.md
+  rules: AGENTS.md
+
+arguments:
+  syntax: null
+  fallback: the text the user typed after the command name
+
+frontmatter:
+  commands:
+    keep: [description]
+    rename: {}
+    drop: [agent, model]
+    add: {}
+    compensate:
+      agent: >-
+        Before starting, read `.cursor/commands/{value}.md` and follow its
+        rules and restrictions for the whole of this command.
+  agents:
+    keep: [description]
+    rename: {}
+    drop: [mode, temperature, permission, model]
+    add: {}
+    compensate:
+      permission: >-
+        Cursor cannot enforce these limits. The restrictions in this file are
+        rules you follow, not walls. Nothing stops a tool call that breaks one.
+      mode: >-
+        Cursor has no subagent. Run this file as its own command in a fresh
+        chat, so it is read without the reasoning that produced the diff.
+  skills:
+    keep: [name, description]
+    rename: {}
+    drop: []
+    add:
+      globs: ""
+      alwaysApply: false
+    compensate: {}
+
+supported_extras:
+  commands: []
+  agents: []
+  skills: [globs, alwaysApply]
+
+permissions:
+  model: none
+  field: null
+  location: null
+  enforced: false
+  granularity: null
+  tool_map: null
+
+enforces:
+  - nothing
+
+advisory:
+  - spec-writer cannot touch source files
+  - spec-writer runs no shell command beyond read-only git
+  - reviewer never edits or writes
+  - reviewer bash is limited to git diff, log, show and status
+  - review runs in a context that has not seen the implementation reasoning
+
+degrades:
+  - concept: subagent with its own context
+    action: a command the user starts in a fresh chat
+    consequence: the review is still separate, but the user must start it
+  - concept: every permission block
+    action: restated in the prose of the file
+    consequence: advisory only, the model usually complies and nothing stops it
+  - concept: $ARGUMENTS substitution
+    action: replaced by the arguments.fallback sentence
+    consequence: the model reads the user's text instead of a substituted value
+  - concept: skill
+    action: an .mdc rule with alwaysApply false
+    consequence: loaded when the description matches, not on every turn
