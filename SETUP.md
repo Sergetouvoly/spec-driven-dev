@@ -15,16 +15,16 @@ installing nothing.
 
 ## Phase 0. Get the source
 
-You need `templates/` from this repository. If you are not already running
-inside a clone:
+You need the source files from this repository: `commands/`, `agents/` and
+`skills/`, all at the root. If you are not already running inside a clone:
 
 ```bash
 git clone --depth 1 https://github.com/Sergetouvoly/spec-driven-dev /tmp/specloop
 ```
 
 If you cannot run git or reach the network, say so and stop. Do not reconstruct
-the templates from memory: you will get the details wrong, and the details are
-the whole point.
+the files from memory: you will get the details wrong, and the details are the
+whole point.
 
 ---
 
@@ -229,6 +229,6 @@ different command prefix, or to stop.
 **Several agents share the project.** Install for each, but keep one docs root
 and one set of markdown. Only the configuration folders differ.
 
-**The user wants to change the workflow itself.** Point them at `templates/`,
-and remind them that `dist/` is generated: editing it there means the next
-update silently reverts their change.
+**The user wants to change the workflow itself.** Point them at the source
+files in this repository. The copy you install in their project is theirs to
+edit, and nothing syncs it back: an improvement worth keeping belongs upstream.

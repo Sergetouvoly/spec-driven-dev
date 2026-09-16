@@ -43,12 +43,7 @@ Read SETUP.md from https://github.com/Sergetouvoly/spec-driven-dev and set this 
 ```
 
 It will detect which agent you are running, ask about five questions, and write
-the files in that agent's native format. Or copy a prebuilt folder yourself:
-
-```bash
-git clone https://github.com/Sergetouvoly/spec-driven-dev /tmp/specloop
-cp -r /tmp/specloop/dist/claude-code/. .     # or kilo-code, opencode, cursor, copilot
-```
+the files in that agent's native format.
 
 Then commit, and run `/spec` on your next feature.
 
@@ -91,7 +86,7 @@ repository is unchanged.
 | opencode | yes | yes | yes | yes |
 | Cursor | yes | as a rule | no | no |
 | Copilot | as prompts | as instructions | partial | no |
-| Other | generated from templates | | | |
+| Other | from the same source files | | | |
 
 Read the last two columns honestly. On Claude Code, Kilo and opencode, "the spec
 writer cannot edit source files" is enforced by the tool: it will fail. On Cursor
@@ -105,14 +100,14 @@ folder, matches the closest format and asks you to confirm before writing.
 ## Repository layout
 
 ```
-templates/      neutral source of truth, one file per command, agent and skill
-adapters/       how each target maps commands, skills, agents and permissions
-dist/           prebuilt folders, generated from templates and adapters
+commands/       one file per command
+agents/         the spec writer and the reviewer
+skills/specs/   the skill that owns the gears, the interview and the template
 SETUP.md        the installer, written to be executed by an agent
 ```
 
-Change a template, regenerate `dist/`, every target stays in sync. Never edit
-`dist/` by hand.
+Nothing is generated and there is nothing to build. The setup guide translates
+these files into the format of whichever agent installs them.
 
 ## Design notes
 
@@ -142,9 +137,11 @@ A spec is a checkpoint, not a ritual. If it is not preventing rework, drop it.
 
 ## Contributing
 
-Edit `templates/`, run the regeneration described in `adapters/README.md`, and
-open a pull request with both the template and the regenerated `dist/`. New
-adapters are welcome: one file in `adapters/`, one folder in `dist/`.
+Edit the file under `commands/`, `agents/` or `skills/` and open a pull
+request. There is nothing to regenerate.
+
+Support for one more agent is a change to `SETUP.md`, not a new folder: the
+setup guide is what knows how each target lays out its files.
 
 ## License
 
