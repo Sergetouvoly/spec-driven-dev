@@ -10,17 +10,39 @@ regenerates it by running this definition.
 
 ## 1. Guard
 
-Everything under `docs/` lives on `main`. If the current branch is not `main`,
-generate the file from `main` (`git show main:...`) rather than from the working
-tree, and say so in the output. A status built on a feature branch describes one
-branch, not the project.
+Everything under `docs/` lives on `main`. A status built on a feature branch
+describes one branch, not the project.
+
+So off `main`, this command reads `main` and writes nothing:
+
+- list the tasks with `git ls-tree --name-only main docs/tasks/active/`, and
+  read each one with `git show main:<path>`. Not `glob`, not the working tree:
+  a feature branch may carry a task file that is not yet on `main`, or an
+  edited copy of one that is, and either would make the status describe the
+  branch.
+- do not overwrite `docs/status.md`. Print the generated status to the user and
+  say it was built from `main` and not saved. Writing it here would commit a
+  description of the project into a branch that holds one task, and the next
+  merge would carry that snapshot onto `main` as if it were current.
+
+On `main`, read the working tree and write the file as described below.
 
 ## 2. Gather
 
-- `glob docs/tasks/active/*` and read each frontmatter
-- for each, does its branch exist, and does it hold commits not in `main`
+On `main`, by `glob`. Off `main`, by `git ls-tree`/`git show` as in section 1 —
+same list, different source.
+
+- the tasks in `docs/tasks/active/`, and each frontmatter
+- for each, does its branch exist (`git rev-parse --verify <branch>`), and how
+  many commits it holds that `main` does not
+  (`git rev-list --count main..<branch>`). Not `git log`: the count is all this
+  file needs, and `git log -p` prints file contents from any revision, which is
+  how an agent denied the archive would read it anyway
+- which of them carry `merged: true`: their code is in, only the archive is
+  left. A pull request merged on the host leaves exactly this, and nothing else
+  would ever mention it again
 - `git rev-parse --abbrev-ref HEAD` and `git status --porcelain`
-- `glob docs/specs/*` for specs with no task yet, and for specs carrying an
+- the specs in `docs/specs/`, for those with no task yet, and those carrying an
   unresolved `[Question]`
 
 Never read `docs/archive/`. Counts come from filenames, not content.
@@ -37,6 +59,7 @@ Updated: <YYYY-MM-DD>
 
 ## In progress
 <id> <title> on <branch>, <n> commits, verify <pass|fail|not run>
+<id> <title> merged, not archived, run /done <id>
 <or: nothing, working tree clean>
 
 ## Next up

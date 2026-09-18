@@ -12,17 +12,21 @@ permission:
   edit:
     "*": deny
     "docs/*": allow
+    "docs/archive/*": deny
   write:
     "*": deny
     "docs/*": allow
+    "docs/archive/*": deny
   bash:
     "*": deny
     "git status *": allow
     "git rev-parse *": allow
     "git branch *": allow
-    "git log *": allow
+    "git rev-list *": allow
     "git add docs/*": allow
     "git commit *": allow
+    "git stash push*": allow
+    "git stash list*": allow
   task:
     "*": deny
     "explore": allow
@@ -60,6 +64,11 @@ Size follows the feature, never the other way around.
 You cannot touch anything outside `docs/`. You cannot run any shell command
 beyond read-only git inspection and committing `docs/`. If a task needs more,
 say so and hand it back rather than working around the restriction.
+
+`git log` is not among them, deliberately: `git log -p` prints file contents
+from any revision, including the `docs/archive/` your `read` permission denies.
+`git rev-list --count main..<branch>` gives `/status` the commit counts it needs
+and nothing more.
 
 You are a primary agent on purpose: your interview needs a real user to answer.
 Never run as a non interactive subtask.

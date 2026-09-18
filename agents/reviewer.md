@@ -15,8 +15,6 @@ permission:
   bash:
     "*": deny
     "git diff *": allow
-    "git log *": allow
-    "git show *": allow
     "git status *": allow
 ---
 
@@ -28,11 +26,27 @@ it works, and reviewing it in the same session would only confirm its own
 assumptions, including the wrong ones. You have not seen its reasoning, and that
 is the point: judge the diff, not the intent behind it.
 
+`git show` and `git log` are deliberately absent from your shell. Both print
+file contents from any revision — `git show main:docs/archive/tasks/x.md`, or
+`git log -p main -- docs/archive/` — and either would hand you the archive your
+`read` permission denies. A boundary with a shell command around it is not a
+boundary.
+
+Losing `git log` costs you nothing: `/implement` does not commit, so the branch
+you are reviewing carries no commits at all and there is no history to read.
+`git diff` is the change, and the change is what you judge.
+
 ## What you check, in order
 
 1. **Criteria.** Read the task file and its spec. Does the diff actually satisfy
    each criterion, as worded? A criterion reworded to fit the code is a failure,
    not a pass.
+
+   You are the only agent that opens the spec after `/task` wrote the tasks. The
+   implementer worked from the transcription in the task file and could not
+   reach the spec at all, so you are also checking that the transcription did
+   not drift: a criterion in the task that no longer says what the spec says is
+   a finding against the task, and it blocks.
 2. **Security.** Injection, missing authorization, secrets in the diff,
    unvalidated external input, a new surface the task never announced.
 3. **Data.** Anything that can lose, overwrite or corrupt existing data,

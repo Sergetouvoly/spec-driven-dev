@@ -59,7 +59,7 @@ spec: docs/specs/<spec-file>.md
 covers: [B1, B3]
 checks: [review]
 verify: <command that exits 0 when the task is done>
-branch: kilo/task/<id>-<short-name>
+branch: <branch-prefix>/<id>-<short-name>
 merged: false
 ---
 
@@ -74,24 +74,58 @@ One sentence. What works once this task is done.
 
 ## Notes
 Dependencies on other tasks, or anything the implementer must not assume.
+Constraints: <each rule from the spec that binds these covers, verbatim>
+Decisions: <docs/adr/<file>.md — one line on what it settles for this task>
 ```
 
 Copy the criteria word for word. Do not reword them: the spec is the contract.
+
+**The task must stand alone.** `/implement` cannot read `docs/specs/`: the
+permission is denied, not merely discouraged. You are holding the spec open
+right now, for the two to six tasks you are about to write, so transcribe here
+everything those tasks will need from it. Whatever you leave behind is lost to
+the implementer, and it comes back to you as a blocked task.
+
+That is also why it is cheap: the spec is read once, by you, instead of once per
+task by an agent that would have to reread it every time.
+
+Drop the `Constraints` and `Decisions` lines when the spec has nothing that
+binds this task. An empty label is noise the implementer still pays for.
 
 Each criterion names how it is proven: a test that `verify` runs, or `manual`
 when nothing can prove it automatically. A criterion with neither is not a
 criterion, rewrite it.
 
 `verify` is the project's test command narrowed to this task, for example
-`npm test -- auth`. If the project has no test runner, set `verify: manual` and
-say so in the report.
+`npm test -- auth`.
+
+If the project has no test runner, set `verify: manual` and say so in the
+report, in those words: **this task will close on a human yes, with no exit code
+behind it.** That is the workflow running without its only non-negotiable gate,
+and it is worth one more attempt at a real command first — a linter, a type
+check, a build, a script that greps for the thing. Anything that exits non-zero
+when the change is wrong beats a confirmation, however narrow it is.
 
 `checks` drives what `/done` runs. Add `e2e` when the criteria describe a user
 journey. Add `pentest` when the task opens a new endpoint, an auth path, an
 upload, or any external input.
 
-For `--adhoc`: no `spec`, no `covers`, `checks: [review]`, and one goal with at
-most two criteria. If it needs more, it deserves a spec: say so and STOP.
+For `--adhoc`: no `spec`, no `covers`, and one goal with at most two criteria.
+If it needs more, it deserves a spec: say so and STOP.
+
+Choose its `checks` rather than defaulting them, and say which you chose in the
+report:
+
+- `checks: []` when `verify` proves the change on its own and the change opens
+  no new surface: a typo, a version bump, a copy change, a test that was
+  missing. `/done` then runs the test command, merges and archives, and costs
+  almost nothing. This is the fast lane, and it is the reason `--adhoc` exists.
+- `checks: [review]` for anything that changes behavior, however small.
+
+An empty `checks` is a decision, not a shortcut, and this is where it is taken:
+with the change still unwritten, by whoever is scoping it. Taken at `/done`
+time it would be taken by the session that just wrote the code, under pressure
+to merge, which is the one moment nobody should be trusted with it.
 
 ## 5. Report and stop
 
@@ -102,3 +136,8 @@ Next: review them, then run /implement
 
 Then regenerate `docs/status.md` as defined in `/status` and commit both on
 `main` with the message `tasks: <spec-slug>`.
+
+The commit comes before your review, not after, and the report says so: the
+tasks are on `main` so that any session can see them, which is the workflow's
+own rule. Review them as committed files and edit them in place — a bad split
+is a commit to amend, not work to redo. Nothing reads them until `/implement`.

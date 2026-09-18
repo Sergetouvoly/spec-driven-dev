@@ -25,8 +25,13 @@ Never read `docs/archive/`.
 
 ## 3. Write
 
-Save to `docs/specs/<short-name>.md`, or `specs/<short-name>.md` if there is no
-`docs` folder. Lowercase, single hyphens, for example `learner-suspension.md`.
+Save to `docs/specs/<short-name>.md`. Lowercase, single hyphens, for example
+`learner-suspension.md`.
+
+There is no fallback location. The docs root is decided once, at setup, and
+substituted into every command, skill and agent permission. A spec written
+outside it is one the spec writer has no permission to create and `/task` would
+never find.
 
 If the file already exists, ask before overwriting.
 

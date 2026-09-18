@@ -25,8 +25,12 @@ Sort every line into one bucket:
 
 Then check one special case: if the current branch matches the `branch` of a
 task in `docs/tasks/active/` and that task has a `## Plan` section, this is an
-interrupted `/implement`, not a dirty tree. Tell the user so, and offer to
-resume that task instead of the requested command.
+interrupted `/implement`, not a dirty tree.
+
+If the caller is `/implement` on that same task, say so in one line and return:
+the command is about to resume it, and the edits are its own work in progress.
+Cleaning them would throw away the session you are trying to continue. For any
+other caller, tell the user and offer to resume that task instead.
 
 ## 2. Explain
 
@@ -44,7 +48,10 @@ Untracked files that match common junk (`node_modules`, `dist`, `.env*`,
 Offer only the options that apply, each with its exact command:
 
 - **Commit it**
-  `git add -A && git commit -m "<message you propose from the diff>"`
+  `git add <the exact paths you listed> && git commit -m "<message you propose from the diff>"`
+  Never `git add -A`: the agent running the calling command may be allowed to
+  commit one folder and not another, and `-A` turns a legitimate commit into a
+  refused one.
 - **Stash it**, to resume after the command
   `git stash push -u -m "before /<command>"`
 - **Ignore it**, for junk only
@@ -54,6 +61,27 @@ Offer only the options that apply, each with its exact command:
   Say clearly that this is irreversible.
 - **Resolve the conflict first**, when the conflict bucket is non-empty.
   No other option is offered until it is done.
+
+**Never offer an option the calling agent cannot execute.** A proposal the
+user picks and that then fails on a permission is worse than not offering it:
+they made a decision on a menu that was a lie. Which options apply depends on
+who called you:
+
+| Caller | Offers | Because |
+| --- | --- | --- |
+| `/spec`, `/task` | stash, and **Commit it** for paths under `docs/` only | the spec writer's shell is deny-by-default: it can commit documents and stash, nothing else. No ignore, no discard |
+| `/drop`, `/done` | all four | they run unbound, as the privileged steps of the workflow |
+| `/implement` | stash, ignore, resolve — **never commit, never discard** | the implementer cannot commit: `/done` owns the commit. It cannot discard either, and does not need to: stash is reversible |
+
+Read the calling agent's own permission block if you are unsure. This table is
+written against the three agents shipped with the workflow, and an installation
+may have narrowed them further.
+
+When the only sensible option is one the caller cannot run — dirty source files
+under `/spec`, where the writer can neither commit nor discard them — say so
+plainly and offer the stash. The stash is the universal answer: it is the one
+action every agent in this workflow is allowed to take, and the only one that
+loses nothing.
 
 Ask which one. Wait for the answer. Do not pick for the user, and do not
 combine options on your own: "commit the tracked, ignore the junk" is a

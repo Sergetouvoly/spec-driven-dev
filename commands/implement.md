@@ -13,24 +13,23 @@ If empty, take the lowest-numbered file in `docs/tasks/active/`.
 
 Follow the `clean-tree` skill, then continue.
 
-Read, in this order and nothing more:
-
-- the task file
-- `docs/CONTEXT.md`
-- any ADR the task's `## Notes` points to
-
-Do not read the spec yet. The task carries its criteria word for word, so the
-spec is only needed when those criteria are not enough. Never read
-`docs/archive/`.
+Read the task file, `docs/CONTEXT.md`, and any ADR named in the task's
+`## Notes`. Nothing else, and never the spec: `/task` already copied into the
+task everything the spec had to say about it, and `docs/specs/` is denied to
+you in read. A task you cannot plan against is a defect in the task. Name the
+missing line and STOP: it is fixed in `/task`, not worked around here.
 
 ## 2. Branch
 
 Check `git rev-parse --verify <branch>` from the frontmatter.
 
-- It exists: switch to it. This task was already started. Read its `## Plan`
-  and the diff against `main` before writing anything, and continue from there
-  rather than restarting.
-- It does not exist: `git switch -c <branch>` from `main`.
+- It exists: `git switch <branch>`. This task was already started. Read its
+  `## Plan` and `git diff main` before writing anything, and continue from
+  there rather than restarting. Two dots: you do not commit, so your earlier
+  work is in the working tree and not in a commit above `main`.
+- It does not exist: `git switch -c <branch> main`. Name `main` as the starting
+  point rather than switching to it first: you cannot go there, and you do not
+  need to.
 
 ## 3. Plan
 
@@ -42,20 +41,10 @@ and what changes in each, in order.
 The plan is written now, against the current code, and is disposable. If an
 earlier `## Plan` exists and you are restarting rather than resuming, replace it.
 
-Open the spec (`spec` in the frontmatter) only if, while planning, you hit one
-of these:
-
-- a criterion is ambiguous on its own
-- the task's `## Notes` mention a constraint that lives in the spec
-- the plan needs a decision the task does not answer
-
-Read only the sections that concern the `covers` ids, plus the context or
-constraints section if there is one.
-
 STOP here and show the plan if any of this is true:
 
-- the spec itself does not answer the decision
-- the plan contradicts an ADR
+- a criterion is ambiguous and the task's `## Notes` do not settle it
+- the plan contradicts an ADR named in `## Notes`
 - the plan touches an area the task never mentioned
 - the task turns out to be obsolete: recommend `/drop` instead
 
@@ -75,16 +64,15 @@ will ask the user.
 If `verify` still fails after three attempts, STOP and report which criterion
 and why. Never loosen a test or reinterpret a criterion to make it pass.
 
-If the code says the criterion itself was wrong, do not silently adapt: STOP,
-say which behavior of the spec is wrong and why. Correcting the spec is a
-`/spec` decision, not an implementation detail.
+If the code says the criterion itself was wrong, do not silently adapt: STOP
+and say which behavior is wrong and why, quoting the criterion from the task.
+Correcting the spec is a `/spec` decision, not an implementation detail.
 
 ## 5. Report
 
 Task: <id> <title>
 Branch: <branch>
 Verify: <pass or fail> | Manual criteria: <count>
-Spec read: yes | no
 Next: run /done
 
 Do not commit here. `/done` owns the commit.

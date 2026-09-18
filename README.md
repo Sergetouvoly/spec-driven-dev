@@ -1,6 +1,6 @@
 # specloop
 
-A spec-driven workflow for AI coding agents. Six commands, two skills, three
+A spec-driven workflow for AI coding agents. Six commands, four skills, three
 subagents, one script. Portable across Claude Code, Kilo Code, opencode, Cursor, Copilot and
 anything else that reads markdown.
 
@@ -22,9 +22,13 @@ Most spec workflows stop at "write a nice document". This one is built around
 three properties that survive contact with a real agent:
 
 **Nothing is proven by a checkbox.** Each acceptance criterion names the test
-that proves it. `/done` runs the test command and reads its exit code. An agent
-that just wrote the code always believes it works, so its opinion is not the
-gate.
+that proves it. `/done` runs the test command and reads its exit code, again
+after every fix a check produced. An agent that just wrote the code always
+believes it works, so its opinion is not the gate.
+
+A project with no test runner can set `verify: manual` and close on a human yes
+instead. It is the one escape hatch, it is the single biggest weakening of the
+setup, and both `/task` and `/done` say so out loud every time it is used.
 
 **Project state lives in one place.** Task state is the folder a file sits in,
 and `docs/status.md` is regenerated from the filesystem, never maintained by
@@ -62,7 +66,7 @@ Then commit, and run `/spec` on your next feature.
 | Command | What it does | Stops for you |
 | --- | --- | --- |
 | `/spec <idea>` | Interviews you, writes a spec with numbered behaviors | yes, for review |
-| `/task <spec>` | Splits it into numbered tasks, each covering behaviors | yes, for review |
+| `/task <spec>` | Splits it into numbered tasks, each covering behaviors | yes, after committing them |
 | `/implement` | Branch, plan, write tests, implement, until tests pass | only if blocked |
 | `/done` | Runs checks, merges, archives, refreshes status | only if a check fails |
 | `/drop <id> <why>` | Abandons a task and reopens its behaviors | no |
@@ -84,7 +88,7 @@ docs/
 └── archive/            finished work, never read by an agent again
 ```
 
-Plus the commands, skill and subagents in your agent's own configuration folder.
+Plus the commands, skills and subagents in your agent's own configuration folder.
 Nothing else. No runtime, no dependency, no lock-in: delete the folder and your
 repository is unchanged.
 
@@ -115,6 +119,8 @@ commands/       one file per command
 agents/         the spec writer, the reviewer and the implementer
 skills/specs/   the skill that owns the gears, the interview and the template
 skills/clean-tree/  the skill that resolves a dirty tree instead of stopping
+skills/e2e-tests/   optional check: proves a journey against the running app
+skills/pentest/     optional check: probes the surface a task just opened
 scripts/map.sh  regenerates docs/MAP.md from git ls-files, pre-commit hook
 SETUP.md        the installer, written to be executed by an agent
 ```
@@ -145,12 +151,50 @@ that runs it: the spec writer cannot edit code, the implementer cannot commit,
 nobody can read the archive. On targets without enforced permissions, these
 fall back to conventions, and the setup guide says which you got.
 
+**Three commands run unbound, and that is the design.** `/spec`, `/task` and
+`/implement` are bound to an agent that constrains them. `/done`, `/drop` and
+`/status` are not: closing a task means editing code after a review, committing,
+reaching the integration branch, merging, deleting a branch and moving files
+into the archive. An agent allowed to do all of that denies nothing worth
+denying, and a permission that denies nothing is worse than none — it reads like
+a guarantee.
+
+So the privilege is stated instead of dressed up: those three are the trusted
+steps, they run with whatever your tool gives the main session, and the setup
+guide lists them as unbound in its report. If that is too much for your project,
+the place to narrow it is your tool's own permission settings, not a decorative
+agent file.
+
+**The spec is read once per feature, not once per task.** `/task` transcribes
+the criteria and the binding constraints into each task file while it has the
+spec open. `/implement` then works from the task alone — it cannot open
+`docs/specs/`, the permission is denied — in `read`, and in every shell command
+that prints a file, because a `read` deny that one `cat` walks around is
+decoration. A token budget written as prose is a preference the model will
+eventually overrule; written as a `deny` the tool enforces, it holds as far as
+the denylist reaches. Which is why the setup guide probes the ways round it and
+not only the front door.
+The trade is deliberate: a task the implementer cannot plan against is a defect
+in `/task`, and it gets fixed where it also helps the next task.
+
+**A wall for the reviewer, a fence for the implementer.** The reviewer needs
+four commands, so its shell is deny-by-default with an allowlist: a wall. The
+implementer has to run whatever the project uses to build and test itself, so
+its shell is allow-by-default with an exhaustive denylist: a fence. A fence has
+to be tested, which is why the setup guide ends on a probe per `deny` and
+reports the ones that did not hold.
+
 **Two review passes maximum.** Then the remainder goes to you.
 
 ## Not for you if
 
 You ship small changes to a codebase you know by heart. The ceremony costs more
 than the mistakes it prevents. Use `/task --adhoc` for those, or nothing at all.
+
+`--adhoc` with `checks: []` is the fast lane: one task file, a branch, the test
+command, a merge. No spec, no review pass, no interview. `verify` still has to
+exit 0 — that one never comes off, because it is the only thing in the workflow
+that is not an opinion.
 
 A spec is a checkpoint, not a ritual. If it is not preventing rework, drop it.
 

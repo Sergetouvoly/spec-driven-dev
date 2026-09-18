@@ -69,14 +69,22 @@ Ask only these. Nothing else is worth interrupting for.
    team can mix tools?
 2. **Docs location.** Recommend `docs/`. Propose an alternative only if the
    project already keeps documentation elsewhere.
-3. **Integration branch and merge style.** You detected branch `<name>`. Does
-   `/done` merge directly, or push and wait for a pull request?
+3. **Integration branch, branch prefix and merge style.** You detected branch
+   `<name>`. Does `/done` merge directly, or push and wait for a pull request?
+   And what prefix should task branches carry? Propose one from the branch names
+   already in `git branch -a`, or `task/` if there is no convention. The
+   template ships `<branch-prefix>` with no default on purpose: a prefix
+   inherited from someone else's tool is the kind of thing nobody notices until
+   it is in fifty branch names.
 4. **Test command.** You detected `<command>`. This is what `/done` runs to
    decide whether a task is finished. If the project has no test runner, say so:
    the workflow falls back to manual confirmation, and tell the user this is the
    single biggest weakening of the setup.
-5. **Optional checks.** `review` is always on. Add `e2e`? Add `pentest`? Only if
-   the project has the tooling or the user wants the skill stubs.
+5. **Optional checks.** `review` is always on. Add `e2e`? Add `pentest`? Each
+   one installs a skill and becomes available in a task's `checks`. Recommend
+   `e2e` when the project already has an e2e runner, `pentest` when it exposes
+   an HTTP surface. A check whose skill is not installed makes `/done` stop, so
+   install the two the user says yes to, and neither of the others.
 
 If the user does not answer, or says "just do it", proceed with your recommended
 answers and list them in the final report as assumptions.
@@ -115,6 +123,10 @@ last verified:
 | Cursor | `.cursor/commands/<name>.md` | `.cursor/rules/<name>.mdc` | not available | `AGENTS.md` |
 | Copilot | `.github/prompts/<name>.prompt.md` | `.github/instructions/<name>.instructions.md` | `.github/agents/<name>.md` | `.github/copilot-instructions.md` |
 
+`skills/specs/` and `skills/clean-tree/` are always installed. `skills/e2e-tests/`
+and `skills/pentest/` are installed only if the user said yes in question 5, and
+the report says which ones landed.
+
 **This table ages.** Before writing, check the folders that already exist in the
 project and the target's current documentation. When what you find disagrees
 with this table, follow what you find and say so in the report.
@@ -135,6 +147,14 @@ than inventing a field:
 - Claude Code: `argument-hint`, `allowed-tools`, `model`
 - Kilo Code: `agent`, `model`; permissions live in the agent file
 - opencode: `agent`, `model`; permissions live in the agent file
+
+`agent:` is the field that binds a command to the agent whose permissions
+constrain it. **Where the target has no such field, do not simply drop it**: the
+command then runs unconstrained, and every `deny` in the agent file becomes
+decorative for that command. On Claude Code, translate the agent's permissions
+into the command's own `allowed-tools`, and say in the report which of the two
+you did. `/implement` without `agent: implementer` is a command that can commit,
+merge and read the archive.
 - Cursor: keep `description` only; `.mdc` rules take `globs` and `alwaysApply`
 - Copilot: `mode`, `tools`, `description`; instructions take `applyTo`
 
@@ -152,6 +172,10 @@ and record what you did:
 | Subagent with its own context | run the review as an explicit fresh session the user starts | review still separate, but manual |
 | Read-only permission on the reviewer | write the restriction in the prose of the file | advisory, not enforced |
 | `spec-writer` cannot touch source | same, in prose | the model usually complies, nothing stops it |
+| `agent:` binding a command to an agent | translate the agent's permissions into the command's `allowed-tools` | the boundary holds for that command, not for the agent everywhere |
+| `implementer` cannot read `docs/specs/` | same, in prose | the token saving becomes a habit rather than a fact; `/task` must still fill `## Notes` |
+| the built-in `explore` subagent, allowed in `task:` for two agents | use the target's own read-only search agent, whatever it is called, and rename it in both agent files | codebase sweeps happen in the main context, and cost it |
+| `e2e` / `pentest` skills the user declined | leave both out, and out of `checks` | `/done` stops on a check whose skill is missing, by design |
 | Command invocation | a prompt file the user opens | same content, different trigger |
 
 Never silently drop a guarantee. A user who believes the spec writer cannot
@@ -162,6 +186,39 @@ touch code, when nothing prevents it, is worse off than one who knows.
 Substitute everywhere the templates use a placeholder: docs path, integration
 branch name, merge style in `/done`, test command as the default `verify`,
 optional checks in the task template.
+
+Three values are written in plain form throughout the templates rather than as
+placeholders, because the sources have to stay readable: the integration branch
+(`main`), the docs root (`docs/`), and the branch prefix (`<branch-prefix>` in
+the task template, which has no default). **Do not find-and-replace them.**
+`main` also appears as an ordinary English word, and `docs/` appears inside
+prose that is about documentation in general.
+
+Go file by file instead, and substitute only the references that mean the
+branch or the path:
+
+| File | What to substitute |
+| --- | --- |
+| `commands/task.md` | the `You must be on main` gate, `branch:` and `spec:` in the template, the final commit target |
+| `commands/implement.md` | `git switch -c <branch> main`, the diff against `main`, every `docs/` path |
+| `commands/done.md` | `git diff main` in A2, the merge and switch in A4, the archive paths in B1 |
+| `commands/drop.md` | the switch in section 1, `git log main..<branch>`, the archive path |
+| `commands/status.md` | `main` in sections 1 and 2, `docs/` everywhere, the output path |
+| `commands/spec.md` | the save path and the context paths |
+| `skills/pentest/SKILL.md` | `git diff main` |
+| `agents/*.md` | every path in a `permission` block, and the two `git switch`/`git checkout` denies |
+| `scripts/map.sh` | `OUT`, if the docs root is not `docs/` |
+
+Then grep the installed files for the old values and read every hit. A hit
+inside prose is fine; a hit inside a command, a path or a permission is one you
+missed.
+
+The agent files hold placeholders too, and they are the ones that matter most:
+`agents/implementer.md` denies `git switch main` and `git checkout main`. If the
+project's integration branch is not `main`, those two lines protect nothing.
+Rewrite them with the real name, and do the same for `<docs>` in every
+permission path if the docs root is not `docs/`. A permission pointing at a path
+that does not exist is the most convincing kind of decorative permission.
 
 ### 4.5 Create the project structure
 
@@ -217,10 +274,51 @@ Do not report success on the strength of having written files.
 1. List everything you created with its size. A zero-byte file is a failure.
    Confirm `<docs>/MAP.md` exists and lists the project's top-level folders.
 2. Confirm each file landed in a folder the target actually scans.
-3. If the target enforces permissions, test one: ask the restricted agent to
-   touch a source file and confirm it is refused. **If it succeeds, your
-   permissions are decorative.** Say so plainly. Then ask the `implementer`
-   agent to run `git commit` and confirm that is refused too.
+3. Test the permissions. Do not assume they work because you wrote them in the
+   right shape: run the probes below, one per agent, and record the result of
+   each. **A probe that succeeds means that permission is decorative.** Say so
+   plainly, by name, in the report.
+
+   | Agent | Ask it to | Expected |
+   | --- | --- | --- |
+   | `spec-writer` | edit a source file outside `<docs>/` | refused |
+   | `spec-writer` | run `npm test` or any non-git command | refused |
+   | `reviewer` | write any file at all | refused |
+   | `reviewer` | read a file under `<docs>/archive/` | refused |
+   | `implementer` | read a file under `<docs>/specs/` | refused |
+   | `implementer` | read a file under `<docs>/archive/` | refused |
+   | `implementer` | run `cat <docs>/specs/<any>` | refused |
+   | `implementer` | run `grep -r . <docs>/specs/` | refused |
+   | `implementer` | run `curl https://example.com` | refused |
+   | `implementer` | run `git commit` with no arguments | refused |
+   | `implementer` | run `git commit -m "probe"` | refused |
+   | `implementer` | run `git switch <integration branch>` | refused |
+   | `implementer` | run `git reset --hard` | refused |
+   | `implementer` | write to a file under `<docs>/archive/` | refused |
+   | `implementer` | run the project's test command | allowed |
+   | `spec-writer` | write to a file under `<docs>/archive/` | refused |
+   | `spec-writer` | run `git stash push -u -m probe` | allowed |
+   | `reviewer` | run `git show <integration branch>:<docs>/archive/tasks/<any>` | refused |
+   | `reviewer` | run `git log -p <integration branch> -- <docs>/archive/` | refused |
+   | `spec-writer` | run `git log -p <integration branch> -- <docs>/archive/` | refused |
+
+   The `git show`, `git log -p`, `cat` and `grep` rows are the ones people skip.
+   A `read` deny means nothing if the same agent has a shell command that prints
+   the file — from a revision, or straight off disk. Probe the bypass, not just
+   the front door. Those four rows are why `reviewer` and `spec-writer` have no
+   `git log` at all, and why `implementer`, whose shell is allow-by-default,
+   carries a deny for every printer it could otherwise reach.
+
+   The two `git commit` rows are not redundant. Most permission engines match
+   globs, and `git commit *` does not match `git commit` on its own. The bare
+   form is the one that gets through, so it is the one worth probing.
+
+   The two `allowed` rows are the opposite failure: a boundary so tight the
+   agent cannot do its job. If the test command is refused, the implementer's
+   deny list caught it and the workflow stalls on the first task. If the stash
+   is refused, `clean-tree` has nothing left to offer `/spec` and `/task`, and
+   every dirty tree becomes a dead end.
+
 4. Confirm the test command from phase 2 runs.
 
 ---
@@ -237,6 +335,8 @@ Docs root: <path>
 Verify command: <command>
 Enforced: <what the tool actually blocks>
 Advisory only: <what is prose the model may ignore>
+Unbound: /done, /drop, /status run with the main session's own permissions
+Probes: <n> of <n> behaved as expected <, and which ones did not>
 Assumptions: <anything the user did not confirm>
 
 Next: commit these files, then run /spec on your next feature.

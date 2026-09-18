@@ -97,7 +97,7 @@ Keep a one-line pointer in the spec instead of duplicating the content.
 
 ## Delivery
 
-Save to `docs/specs/<short-name>.md`, or `specs/<short-name>.md` if no `docs` folder exists.
+Save to `docs/specs/<short-name>.md`. There is no fallback location: the docs root is set once at setup.
 
 A spec is a **checkpoint, not permission to code**.
 
