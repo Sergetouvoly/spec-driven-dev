@@ -1,19 +1,26 @@
 ---
-description: Open the next task, create its branch, plan it, and implement it
+description: Implement the next task: create its branch, plan it, work it until verify passes
 ---
 
-# /next
+# /implement
 
-Task to open: $ARGUMENTS
+Task to implement: $ARGUMENTS
 
 If empty, take the lowest-numbered file in `docs/tasks/active/`.
 
 ## 1. Preconditions
 
-Run `git status --porcelain`. If the tree is dirty, STOP and say so.
+Follow the `clean-tree` skill, then continue.
 
-Read the task file, then its spec if it has one, then `docs/CONTEXT.md` and any
-ADR the spec points to. Never read `docs/archive/`.
+Read, in this order and nothing more:
+
+- the task file
+- `docs/CONTEXT.md`
+- any ADR the task's `## Notes` points to
+
+Do not read the spec yet. The task carries its criteria word for word, so the
+spec is only needed when those criteria are not enough. Never read
+`docs/archive/`.
 
 ## 2. Branch
 
@@ -26,15 +33,27 @@ Check `git rev-parse --verify <branch>` from the frontmatter.
 
 ## 3. Plan
 
-Read the code the task touches, then write a `## Plan` section into the task
-file: the files to change and what changes in each, in order.
+Read `docs/MAP.md` if it exists: it is the tracked file tree, and it tells you
+where things live before you open anything. Then read only the code the task
+touches, and write a `## Plan` section into the task file: the files to change
+and what changes in each, in order.
 
 The plan is written now, against the current code, and is disposable. If an
 earlier `## Plan` exists and you are restarting rather than resuming, replace it.
 
+Open the spec (`spec` in the frontmatter) only if, while planning, you hit one
+of these:
+
+- a criterion is ambiguous on its own
+- the task's `## Notes` mention a constraint that lives in the spec
+- the plan needs a decision the task does not answer
+
+Read only the sections that concern the `covers` ids, plus the context or
+constraints section if there is one.
+
 STOP here and show the plan if any of this is true:
 
-- the task needs a decision the spec does not answer
+- the spec itself does not answer the decision
 - the plan contradicts an ADR
 - the plan touches an area the task never mentioned
 - the task turns out to be obsolete: recommend `/drop` instead
@@ -64,6 +83,7 @@ say which behavior of the spec is wrong and why. Correcting the spec is a
 Task: <id> <title>
 Branch: <branch>
 Verify: <pass or fail> | Manual criteria: <count>
+Spec read: yes | no
 Next: run /done
 
 Do not commit here. `/done` owns the commit.

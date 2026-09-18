@@ -14,7 +14,7 @@ forgotten.
 
 Read the task. If `merged: true`, it is already closed: STOP and say so.
 
-Switch to `main`. If the tree is dirty, STOP.
+Follow the `clean-tree` skill, then switch to `main`.
 
 ## 2. Branch
 

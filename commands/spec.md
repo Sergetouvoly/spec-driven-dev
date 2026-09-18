@@ -14,8 +14,7 @@ final check. This file owns only the mechanics around it.
 
 ## 1. Clean tree
 
-Run `git status --porcelain`. If anything is uncommitted, unstaged or untracked,
-tell the user to commit or stash, and STOP.
+Follow the `clean-tree` skill, then continue.
 
 ## 2. Context
 
