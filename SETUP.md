@@ -219,7 +219,8 @@ Do not report success on the strength of having written files.
 2. Confirm each file landed in a folder the target actually scans.
 3. If the target enforces permissions, test one: ask the restricted agent to
    touch a source file and confirm it is refused. **If it succeeds, your
-   permissions are decorative.** Say so plainly.
+   permissions are decorative.** Say so plainly. Then ask the `implementer`
+   agent to run `git commit` and confirm that is refused too.
 4. Confirm the test command from phase 2 runs.
 
 ---

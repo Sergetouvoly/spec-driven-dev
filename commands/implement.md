@@ -1,5 +1,6 @@
 ---
 description: Implement the next task: create its branch, plan it, work it until verify passes
+agent: implementer
 ---
 
 # /implement

@@ -41,8 +41,10 @@ Numbers are scoped to the spec, not global: `<spec-slug>-001`, `<spec-slug>-002`
 Two features split in parallel can never collide, and the task file names its
 own spec.
 
-Continue from the highest number carrying that slug, across
-`docs/tasks/active/` and `docs/archive/tasks/`. Numbers are never reused.
+Continue from the highest number carrying that slug. Glob the file names in
+`docs/tasks/active/` and `docs/archive/tasks/`, never their content: the
+archive is not read, it is listed. Other slugs are ignored. Numbers are never
+reused, so a spec split a second time continues where it stopped.
 
 Ad-hoc tasks use the slug `adhoc`.
 

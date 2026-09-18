@@ -1,6 +1,6 @@
 # specloop
 
-A spec-driven workflow for AI coding agents. Six commands, two skills, two
+A spec-driven workflow for AI coding agents. Six commands, two skills, three
 subagents, one script. Portable across Claude Code, Kilo Code, opencode, Cursor, Copilot and
 anything else that reads markdown.
 
@@ -112,7 +112,7 @@ folder, matches the closest format and asks you to confirm before writing.
 
 ```
 commands/       one file per command
-agents/         the spec writer and the reviewer
+agents/         the spec writer, the reviewer and the implementer
 skills/specs/   the skill that owns the gears, the interview and the template
 skills/clean-tree/  the skill that resolves a dirty tree instead of stopping
 scripts/map.sh  regenerates docs/MAP.md from git ls-files, pre-commit hook
@@ -138,6 +138,12 @@ cannot disappear silently while the spec still promises it.
 **Blocking means three things only**: incorrect behavior against a criterion, a
 security hole, possible data loss. Everything else is follow-up. A reviewer that
 always finds something teaches you to ignore it.
+
+**A sentence in a command is a preference. A permission in an agent file is a
+boundary.** Every "never" in the commands has a matching `deny` in the agent
+that runs it: the spec writer cannot edit code, the implementer cannot commit,
+nobody can read the archive. On targets without enforced permissions, these
+fall back to conventions, and the setup guide says which you got.
 
 **Two review passes maximum.** Then the remainder goes to you.
 

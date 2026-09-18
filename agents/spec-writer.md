@@ -3,7 +3,9 @@ description: Writes specifications and task breakdowns. Interviews the user, the
 mode: primary
 temperature: 0.2
 permission:
-  read: allow
+  read:
+    "*": allow
+    "docs/archive/*": deny
   glob: allow
   grep: allow
   webfetch: deny

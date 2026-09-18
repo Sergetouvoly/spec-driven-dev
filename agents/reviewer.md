@@ -3,7 +3,9 @@ description: Reviews a branch diff against the task criteria. Read-only, runs in
 mode: subagent
 temperature: 0.1
 permission:
-  read: allow
+  read:
+    "*": allow
+    "docs/archive/*": deny
   glob: allow
   grep: allow
   edit: deny
