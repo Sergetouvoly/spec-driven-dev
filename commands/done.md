@@ -52,7 +52,9 @@ you will read in six months.
 
 ## A4. Commit and merge
 
-Stage the code only, not `docs/`. One commit:
+Stage the code only, not `docs/`. The pre-commit hook adds `docs/MAP.md` on
+its own when the file tree changed: it is derived, and it travels with the
+commit that changed the tree. One commit:
 
 ```
 <id> <task title>
@@ -89,4 +91,4 @@ Task <id>: done and merged
 Checks: <list>
 Follow-up: <count>
 Remaining: <count> in docs/tasks/active/
-Next: <id> <title>, run /next
+Next: <id> <title>, run /implement

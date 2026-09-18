@@ -14,8 +14,7 @@ Two modes:
 
 ## 1. Preconditions
 
-Run `git status --porcelain`. If the tree is dirty, tell the user to commit or
-stash, and STOP.
+Follow the `clean-tree` skill, then continue.
 
 You must be on `main`. Tasks and specs live on `main` only, never on a feature
 branch: a task file archived on a branch is invisible to every other session
@@ -97,7 +96,7 @@ most two criteria. If it needs more, it deserves a spec: say so and STOP.
 Tasks: <count> in docs/tasks/active/
 Coverage: <n>/<n> behaviors
 Manual criteria: <count>
-Next: review them, then run /next
+Next: review them, then run /implement
 
 Then regenerate `docs/status.md` as defined in `/status` and commit both on
 `main` with the message `tasks: <spec-slug>`.

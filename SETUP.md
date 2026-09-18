@@ -15,8 +15,8 @@ installing nothing.
 
 ## Phase 0. Get the source
 
-You need the source files from this repository: `commands/`, `agents/` and
-`skills/`, all at the root. If you are not already running inside a clone:
+You need the source files from this repository: `commands/`, `agents/`,
+`skills/` and `scripts/`, all at the root. If you are not already running inside a clone:
 
 ```bash
 git clone --depth 1 https://github.com/Sergetouvoly/spec-driven-dev /tmp/specloop
@@ -173,7 +173,31 @@ Write a starter `<docs>/CONTEXT.md` holding only what you learned in phase 1:
 stack, entry points, test command, naming conventions actually observed in the
 code. Three to fifteen lines. Do not pad it, and do not guess.
 
+End it with a `## Layout` section: one line per top-level folder, what it is
+for. `<docs>/MAP.md` will carry the structure; this section carries the
+meaning, which no script can produce.
+
 Generate `<docs>/status.md` by running the `/status` definition.
+
+### 4.6 Install the map hook
+
+Copy `scripts/map.sh` into the project's `scripts/` folder (create it if
+needed), make it executable, and install it as the pre-commit hook:
+
+```bash
+mkdir -p scripts && cp /tmp/specloop/scripts/map.sh scripts/map.sh
+chmod +x scripts/map.sh
+ln -sf ../../scripts/map.sh .git/hooks/pre-commit
+scripts/map.sh --force
+```
+
+If the project already has a pre-commit hook (husky, pre-commit, lefthook, or a
+hand-written one), do not replace it: add a line calling `scripts/map.sh` to
+the existing hook and say so in the report. If `<docs>` is not `docs/`, set
+`OUT` in the script accordingly.
+
+The script is pure shell and awk. It reads `git ls-files`, so it needs no
+ignore list of its own, and it runs in well under a second.
 
 Add to the project rules file, appending rather than replacing:
 
@@ -191,6 +215,7 @@ for the current state. Never read docs/archive/: it is a human trail, not contex
 Do not report success on the strength of having written files.
 
 1. List everything you created with its size. A zero-byte file is a failure.
+   Confirm `<docs>/MAP.md` exists and lists the project's top-level folders.
 2. Confirm each file landed in a folder the target actually scans.
 3. If the target enforces permissions, test one: ask the restricted agent to
    touch a source file and confirm it is refused. **If it succeeds, your
@@ -204,7 +229,8 @@ Do not report success on the strength of having written files.
 ```
 Installed for: <target(s)>
 Commands: <list>
-Skill: <path>
+Skills: <paths>
+Map hook: <installed, or merged into existing hook>
 Subagents: <list, or "not supported on this target">
 Docs root: <path>
 Verify command: <command>
