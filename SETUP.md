@@ -15,8 +15,8 @@ installing nothing.
 
 ## Phase 0. Get the source
 
-You need the source files from this repository: `commands/`, `agents/`,
-`skills/` and `scripts/`, all at the root. If you are not already running inside a clone:
+You need the source files from this repository: `commands/`, `agents/` and
+`skills/`, all at the root. If you are not already running inside a clone:
 
 ```bash
 git clone --depth 1 https://github.com/Sergetouvoly/spec-driven-dev /tmp/specloop
@@ -210,7 +210,6 @@ branch or the path:
 | `skills/pentest/SKILL.md` | `git diff main` |
 | `skills/changelog/SKILL.md` | the `docs/specs/` path it reads the spec from |
 | `agents/*.md` | every path in a `permission` block, and the two `git switch`/`git checkout` denies |
-| `scripts/map.sh` | `OUT`, if the docs root is not `docs/` |
 
 Then grep the installed files for the old values and read every hit. A hit
 inside prose is fine; a hit inside a command, a path or a permission is one you
@@ -234,30 +233,17 @@ stack, entry points, test command, naming conventions actually observed in the
 code. Three to fifteen lines. Do not pad it, and do not guess.
 
 End it with a `## Layout` section: one line per top-level folder, what it is
-for. `<docs>/MAP.md` will carry the structure; this section carries the
-meaning, which no script can produce.
+for. The agent's `glob` finds the structure whenever it needs it; this section
+carries the meaning, which no listing can produce. Keep it to one line each.
 
 Generate `<docs>/status.md` by running the `/status` definition.
 
-### 4.6 Install the map hook
+### 4.6 Project rules
 
-Copy `scripts/map.sh` into the project's `scripts/` folder (create it if
-needed), make it executable, and install it as the pre-commit hook:
-
-```bash
-mkdir -p scripts && cp /tmp/specloop/scripts/map.sh scripts/map.sh
-chmod +x scripts/map.sh
-ln -sf ../../scripts/map.sh .git/hooks/pre-commit
-scripts/map.sh --force
-```
-
-If the project already has a pre-commit hook (husky, pre-commit, lefthook, or a
-hand-written one), do not replace it: add a line calling `scripts/map.sh` to
-the existing hook and say so in the report. If `<docs>` is not `docs/`, set
-`OUT` in the script accordingly.
-
-The script is pure shell and awk. It reads `git ls-files`, so it needs no
-ignore list of its own, and it runs in well under a second.
+**Install no hook and no script.** This workflow is markdown and nothing else:
+if you find yourself writing a pre-commit hook, copying a shell script, or
+adding a dependency, you have gone past the end of this guide. Where code lives
+is answered by the agent's own `glob`, on demand and always current.
 
 Add to the project rules file, appending rather than replacing:
 
@@ -282,7 +268,6 @@ context.
 Do not report success on the strength of having written files.
 
 1. List everything you created with its size. A zero-byte file is a failure.
-   Confirm `<docs>/MAP.md` exists and lists the project's top-level folders.
 2. Confirm each file landed in a folder the target actually scans.
 3. Test the permissions. Do not assume they work because you wrote them in the
    right shape: run the probes below, one per agent, and record the result of
@@ -361,7 +346,6 @@ Do not report success on the strength of having written files.
 Installed for: <target(s)>
 Commands: <list>
 Skills: <paths, including changelog>
-Map hook: <installed, or merged into existing hook>
 Subagents: <list, or "not supported on this target">
 Docs root: <path>
 Verify command: <command>

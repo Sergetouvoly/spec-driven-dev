@@ -105,9 +105,7 @@ and it is now a document that stays in `docs/specs/` for good.
 
 ## A4. Commit and merge
 
-Stage the code **and this task's own file**, nothing else under `docs/`. The
-pre-commit hook adds `docs/MAP.md` on its own when the file tree changed: it is
-derived, and it travels with the commit that changed the tree.
+Stage the code **and this task's own file**, nothing else under `docs/`.
 
 `/implement` wrote `## Plan` into the task file, ticked the boxes it proved, and
 A2 may have added `## Follow-up`. None of that is committed yet: `/implement`
