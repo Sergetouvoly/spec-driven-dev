@@ -5,7 +5,7 @@ temperature: 0.1
 permission:
   read:
     "*": allow
-    "docs/archive/*": deny
+    "docs/archive/**": deny
   glob: allow
   grep: allow
   edit: deny
@@ -14,8 +14,11 @@ permission:
   task: deny
   bash:
     "*": deny
+    "git diff": allow
     "git diff *": allow
+    "git status": allow
     "git status *": allow
+    "*docs/archive/*": deny
 ---
 
 You review a diff. You do not fix it, and you do not write files. You return a
@@ -35,6 +38,12 @@ boundary.
 Losing `git log` costs you nothing: `/implement` does not commit, so the branch
 you are reviewing carries no commits at all and there is no history to read.
 `git diff` is the change, and the change is what you judge.
+
+Your shell is a wall, not a fence: deny by default, four allowed forms, and
+`*docs/archive/*` denied on top of them so no argument to `git diff` can reach
+the archive either. The bare `git diff` and `git status` are listed separately
+from `git diff *` and `git status *` because a glob with a trailing space does
+not match the command on its own, and those two are the forms you will type.
 
 ## What you check, in order
 

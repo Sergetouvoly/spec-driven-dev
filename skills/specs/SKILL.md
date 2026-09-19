@@ -56,6 +56,11 @@ Observable behavior only. Happy path first, then the states and failures that ma
 Business rules, permissions, invariants, audit requirements, and technical
 constraints that affect behavior.
 
+## Decisions
+Each decision taken during the interview, and why, one line each. Only the ones
+that close an alternative someone could reasonably reopen.
+- <what was decided> — <why, and what it rules out>
+
 ## Acceptance criteria
 - [ ] **B1.** Observable, testable, unambiguous.
 
@@ -63,6 +68,16 @@ constraints that affect behavior.
 - [Question] ...
 - [Assumption] ...
 ```
+
+`## Decisions` is where a resolved question goes. Without it the answer the user
+gave you survives only as the shape of a behavior, and the next person to read
+the spec reopens the debate you already closed. A `[Question]` that gets answered
+moves here with its answer; it does not simply disappear.
+
+The checkboxes under `## Acceptance criteria` are not decoration and you do not
+tick them. `/done` ticks each one when a task proves it, and writes the task id
+next to it. That is what makes a spec navigable to its tasks, so leave them
+unticked and leave the numbers alone.
 
 Add optional sections only when useful: `User flow`, `Data model`, `API contract`, `Security`, `Performance`, `Dependencies`.
 
@@ -76,6 +91,46 @@ Add optional sections only when useful: `User flow`, `Data model`, `API contract
 - Unresolved decisions go in `Open questions and assumptions`.
 - Small feature, small spec.
 - Do not duplicate durable project knowledge or architectural decisions. Reference `CONTEXT.md` or an ADR instead.
+
+## Evolving a spec
+
+A spec is not consumed by being implemented. It stays in `docs/specs/` for the
+life of the feature, and the second change to that feature edits it rather than
+starting a new document.
+
+When you come back to a spec that already has ticked criteria:
+
+- **Never renumber, never reuse.** `B1` means one thing forever: tasks, tests,
+  commit messages and archived work all point at it. A new behavior takes the
+  next free number, even if it belongs in the middle of the list conceptually.
+- **A ticked criterion is delivered.** Leave the tick and the task id. If the
+  behavior itself must change, edit the criterion in place, keep its number,
+  untick it, and say in `Open questions and assumptions` what changed and why —
+  that untick is what makes `/task` pick it up again.
+- **A removed behavior is struck, not deleted.** Strike it in **both** places —
+  the behavior under `## Expected behavior` and its criterion — and give the
+  criterion a reason:
+
+  ```markdown
+  - [ ] ~~**B4.**~~ withdrawn 2026-09-19: admin tooling deferred, see lockout-003.
+  ```
+
+  Deleting it instead would break every reference to the number and make the
+  archived task that carried it unexplainable.
+
+  **A struck criterion is neither delivered nor pending.** Leave its box
+  unticked — it was never proven — and understand that `~~` is what takes it out
+  of play: `/task` does not split it, `/status` leaves it out of the totals, and
+  `changelog` does not hold the feature back for it. Without the strike an
+  unticked box means "still to build", and the behavior would be re-split
+  forever.
+- **No `spec-v2.md`.** One file per feature, always the current contract. Git
+  holds every previous state, with the diff and the reason in the commit, which
+  is a better history than three files that each claim to be the truth.
+
+Keep any in-document history to the `Open questions and assumptions` lines above.
+If you find yourself writing a changelog inside the spec, that belongs in
+`CHANGELOG.md`.
 
 ## What outlives the feature
 
@@ -97,7 +152,7 @@ Keep a one-line pointer in the spec instead of duplicating the content.
 
 ## Delivery
 
-Save to `docs/specs/<short-name>.md`. There is no fallback location: the docs root is set once at setup.
+Save to `docs/specs/<short-name>.md`, and see `/spec` for the mechanics around it.
 
 A spec is a **checkpoint, not permission to code**.
 

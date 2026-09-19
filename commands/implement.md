@@ -33,10 +33,14 @@ Check `git rev-parse --verify <branch>` from the frontmatter.
 
 ## 3. Plan
 
-Read `docs/MAP.md` if it exists: it is the tracked file tree, and it tells you
-where things live before you open anything. Then read only the code the task
-touches, and write a `## Plan` section into the task file: the files to change
-and what changes in each, in order.
+Find where things live with your own `glob` and `grep`, scoped to the areas the
+task names rather than swept across the repository. Then read only the code the
+task touches, and write a `## Plan` section into the task file: the files to
+change and what changes in each, in order.
+
+Scoped is the point. The task already says which areas it may touch, so a glob
+over those is both cheaper and more current than any file tree a repository
+could keep for you.
 
 The plan is written now, against the current code, and is disposable. If an
 earlier `## Plan` exists and you are restarting rather than resuming, replace it.

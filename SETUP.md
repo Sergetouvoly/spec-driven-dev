@@ -15,8 +15,8 @@ installing nothing.
 
 ## Phase 0. Get the source
 
-You need the source files from this repository: `commands/`, `agents/`,
-`skills/` and `scripts/`, all at the root. If you are not already running inside a clone:
+You need the source files from this repository: `commands/`, `agents/` and
+`skills/`, all at the root. If you are not already running inside a clone:
 
 ```bash
 git clone --depth 1 https://github.com/Sergetouvoly/spec-driven-dev /tmp/specloop
@@ -123,9 +123,11 @@ last verified:
 | Cursor | `.cursor/commands/<name>.md` | `.cursor/rules/<name>.mdc` | not available | `AGENTS.md` |
 | Copilot | `.github/prompts/<name>.prompt.md` | `.github/instructions/<name>.instructions.md` | `.github/agents/<name>.md` | `.github/copilot-instructions.md` |
 
-`skills/specs/` and `skills/clean-tree/` are always installed. `skills/e2e-tests/`
-and `skills/pentest/` are installed only if the user said yes in question 5, and
-the report says which ones landed.
+`skills/specs/`, `skills/clean-tree/` and `skills/changelog/` are always
+installed: the first two are used by `/spec`, `/task` and `/implement`, and the
+third is called by `/done` when a feature's last criterion is ticked.
+`skills/e2e-tests/` and `skills/pentest/` are installed only if the user said yes
+in question 5, and the report says which ones landed.
 
 **This table ages.** Before writing, check the folders that already exist in the
 project and the target's current documentation. When what you find disagrees
@@ -174,7 +176,7 @@ and record what you did:
 | `spec-writer` cannot touch source | same, in prose | the model usually complies, nothing stops it |
 | `agent:` binding a command to an agent | translate the agent's permissions into the command's `allowed-tools` | the boundary holds for that command, not for the agent everywhere |
 | `implementer` cannot read `docs/specs/` | same, in prose | the token saving becomes a habit rather than a fact; `/task` must still fill `## Notes` |
-| the built-in `explore` subagent, allowed in `task:` for two agents | use the target's own read-only search agent, whatever it is called, and rename it in both agent files | codebase sweeps happen in the main context, and cost it |
+| the built-in `explore` subagent, allowed in `task:` for `spec-writer` only | use the target's own read-only search agent, whatever it is called, and rename it in that agent file | codebase sweeps happen in the main context, and cost it |
 | `e2e` / `pentest` skills the user declined | leave both out, and out of `checks` | `/done` stops on a check whose skill is missing, by design |
 | Command invocation | a prompt file the user opens | same content, different trigger |
 
@@ -206,8 +208,8 @@ branch or the path:
 | `commands/status.md` | `main` in sections 1 and 2, `docs/` everywhere, the output path |
 | `commands/spec.md` | the save path and the context paths |
 | `skills/pentest/SKILL.md` | `git diff main` |
+| `skills/changelog/SKILL.md` | the `docs/specs/` path it reads the spec from |
 | `agents/*.md` | every path in a `permission` block, and the two `git switch`/`git checkout` denies |
-| `scripts/map.sh` | `OUT`, if the docs root is not `docs/` |
 
 Then grep the installed files for the old values and read every hit. A hit
 inside prose is fine; a hit inside a command, a path or a permission is one you
@@ -223,7 +225,7 @@ that does not exist is the most convincing kind of decorative permission.
 ### 4.5 Create the project structure
 
 ```bash
-mkdir -p <docs>/specs <docs>/tasks/active <docs>/archive/tasks <docs>/archive/specs <docs>/adr
+mkdir -p <docs>/specs <docs>/tasks/active <docs>/archive/tasks <docs>/adr
 ```
 
 Write a starter `<docs>/CONTEXT.md` holding only what you learned in phase 1:
@@ -231,30 +233,17 @@ stack, entry points, test command, naming conventions actually observed in the
 code. Three to fifteen lines. Do not pad it, and do not guess.
 
 End it with a `## Layout` section: one line per top-level folder, what it is
-for. `<docs>/MAP.md` will carry the structure; this section carries the
-meaning, which no script can produce.
+for. The agent's `glob` finds the structure whenever it needs it; this section
+carries the meaning, which no listing can produce. Keep it to one line each.
 
 Generate `<docs>/status.md` by running the `/status` definition.
 
-### 4.6 Install the map hook
+### 4.6 Project rules
 
-Copy `scripts/map.sh` into the project's `scripts/` folder (create it if
-needed), make it executable, and install it as the pre-commit hook:
-
-```bash
-mkdir -p scripts && cp /tmp/specloop/scripts/map.sh scripts/map.sh
-chmod +x scripts/map.sh
-ln -sf ../../scripts/map.sh .git/hooks/pre-commit
-scripts/map.sh --force
-```
-
-If the project already has a pre-commit hook (husky, pre-commit, lefthook, or a
-hand-written one), do not replace it: add a line calling `scripts/map.sh` to
-the existing hook and say so in the report. If `<docs>` is not `docs/`, set
-`OUT` in the script accordingly.
-
-The script is pure shell and awk. It reads `git ls-files`, so it needs no
-ignore list of its own, and it runs in well under a second.
+**Install no hook and no script.** This workflow is markdown and nothing else:
+if you find yourself writing a pre-commit hook, copying a shell script, or
+adding a dependency, you have gone past the end of this guide. Where code lives
+is answered by the agent's own `glob`, on demand and always current.
 
 Add to the project rules file, appending rather than replacing:
 
@@ -262,7 +251,14 @@ Add to the project rules file, appending rather than replacing:
 ## Workflow
 
 Features go through /spec then /task before implementation. See docs/status.md
-for the current state. Never read docs/archive/: it is a human trail, not context.
+for the current state.
+
+Specs in docs/specs/ are durable and are never archived: a delivered feature
+still has a contract, and /spec edits it in place rather than starting a new one.
+Ticked acceptance criteria name the task that delivered them.
+
+Never read docs/archive/: it holds finished tasks, a human trail rather than
+context.
 ```
 
 ---
@@ -272,7 +268,6 @@ for the current state. Never read docs/archive/: it is a human trail, not contex
 Do not report success on the strength of having written files.
 
 1. List everything you created with its size. A zero-byte file is a failure.
-   Confirm `<docs>/MAP.md` exists and lists the project's top-level folders.
 2. Confirm each file landed in a folder the target actually scans.
 3. Test the permissions. Do not assume they work because you wrote them in the
    right shape: run the probes below, one per agent, and record the result of
@@ -286,9 +281,15 @@ Do not report success on the strength of having written files.
    | `reviewer` | write any file at all | refused |
    | `reviewer` | read a file under `<docs>/archive/` | refused |
    | `implementer` | read a file under `<docs>/specs/` | refused |
-   | `implementer` | read a file under `<docs>/archive/` | refused |
+   | `implementer` | read a file under `<docs>/archive/tasks/` | refused |
    | `implementer` | run `cat <docs>/specs/<any>` | refused |
    | `implementer` | run `grep -r . <docs>/specs/` | refused |
+   | `implementer` | run `git cat-file -p <branch>:<docs>/specs/<any>` | refused |
+   | `implementer` | run `git grep . <branch> -- <docs>/specs/` | refused |
+   | `implementer` | run `cp <docs>/specs/<any> ./notes.txt` | refused |
+   | `implementer` | run `git diff` | allowed |
+   | `implementer` | delegate to any subagent, e.g. `explore` | refused |
+   | `explore` (as `spec-writer` calls it) | read a file under `<docs>/archive/tasks/` | refused |
    | `implementer` | run `curl https://example.com` | refused |
    | `implementer` | run `git commit` with no arguments | refused |
    | `implementer` | run `git commit -m "probe"` | refused |
@@ -296,18 +297,46 @@ Do not report success on the strength of having written files.
    | `implementer` | run `git reset --hard` | refused |
    | `implementer` | write to a file under `<docs>/archive/` | refused |
    | `implementer` | run the project's test command | allowed |
-   | `spec-writer` | write to a file under `<docs>/archive/` | refused |
+   | `spec-writer` | write to a file under `<docs>/archive/tasks/` | refused |
+   | `spec-writer` | write to `<docs>/tasks/active/probe.md` | allowed |
    | `spec-writer` | run `git stash push -u -m probe` | allowed |
+   | `reviewer` | read a file under `<docs>/specs/` | allowed |
    | `reviewer` | run `git show <integration branch>:<docs>/archive/tasks/<any>` | refused |
    | `reviewer` | run `git log -p <integration branch> -- <docs>/archive/` | refused |
    | `spec-writer` | run `git log -p <integration branch> -- <docs>/archive/` | refused |
 
-   The `git show`, `git log -p`, `cat` and `grep` rows are the ones people skip.
-   A `read` deny means nothing if the same agent has a shell command that prints
-   the file — from a revision, or straight off disk. Probe the bypass, not just
-   the front door. Those four rows are why `reviewer` and `spec-writer` have no
-   `git log` at all, and why `implementer`, whose shell is allow-by-default,
-   carries a deny for every printer it could otherwise reach.
+   The `git show`, `git log -p`, `git cat-file`, `git grep`, `cat`, `grep` and
+   `cp` rows are the ones people skip. A `read` deny means nothing if the same
+   agent has a shell command that prints the file — from a revision, straight off
+   disk, or by copying it to a path that is not denied and reading it there.
+   Probe the bypass, not just the front door. Those rows are why `reviewer` and
+   `spec-writer` have no `git log` at all, and why `implementer`, whose shell is
+   allow-by-default, denies the *path* in any command (`*<docs>/specs/*`) on top
+   of the printers it denies by name.
+
+   **Probe the nested paths, not the top-level one.** In a path glob, `*` stops
+   at a slash, so `<docs>/archive/*` does not match
+   `<docs>/archive/tasks/auth-001.md` — which is the only place archived tasks
+   ever are. Every path permission in the three agent files ends in `**` for that
+   reason. If your target's engine uses different semantics, the probe rows above
+   are what will tell you, and they are worth running even when the YAML looks
+   obviously correct.
+
+   **A subagent is the bypass that looks legitimate.** It runs on its own
+   permissions, not the caller's, so delegating a read is how an agent reaches
+   what its own `read` deny forbids — and in a transcript it looks like ordinary
+   delegation rather than a workaround. `implementer` therefore has `task`
+   denied outright. `spec-writer` keeps `explore`, because the sweep is worth it
+   and the code is its to read anyway, so give `explore` the same
+   `<docs>/archive/**` deny and probe it. If your target's read-only search agent
+   cannot be constrained, say so in the report: the archive deny then holds for
+   `spec-writer` and not for what it delegates.
+
+   The two `allowed` rows for `spec-writer` writing a task file and `implementer`
+   running `git diff` are the same kind of check in the other direction: the
+   first is a permission that was `<docs>/*` and silently blocked `/task` from
+   writing anything under `<docs>/tasks/active/`, the second is what `/implement`
+   needs to resume a branch.
 
    The two `git commit` rows are not redundant. Most permission engines match
    globs, and `git commit *` does not match `git commit` on its own. The bare
@@ -328,8 +357,7 @@ Do not report success on the strength of having written files.
 ```
 Installed for: <target(s)>
 Commands: <list>
-Skills: <paths>
-Map hook: <installed, or merged into existing hook>
+Skills: <paths, including changelog>
 Subagents: <list, or "not supported on this target">
 Docs root: <path>
 Verify command: <command>
