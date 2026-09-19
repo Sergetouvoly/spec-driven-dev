@@ -44,6 +44,11 @@ a line to the spec's `Open questions and assumptions`:
 Otherwise a behavior silently disappears from the project while its spec still
 claims it.
 
+Leave their acceptance criteria unticked, which is what they already are: only
+`/done` ticks, and this task never finished. That is what puts them back in front
+of `/task` if the answer to the question is yes, and it is what keeps the feature
+out of `CHANGELOG.md` until someone decides.
+
 ## 4. Refresh and report
 
 Regenerate `docs/status.md` as defined in `/status`. Commit on `main` with the

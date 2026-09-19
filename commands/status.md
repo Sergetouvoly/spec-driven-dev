@@ -42,8 +42,19 @@ same list, different source.
   left. A pull request merged on the host leaves exactly this, and nothing else
   would ever mention it again
 - `git rev-parse --abbrev-ref HEAD` and `git status --porcelain`
-- the specs in `docs/specs/`, for those with no task yet, and those carrying an
-  unresolved `[Question]`
+
+- the specs in `docs/specs/`, and for each, how many of its `## Acceptance
+  criteria` are ticked. Specs are never archived, so `docs/specs/` holds every
+  feature the product has ever promised, and the ticks are what separate the
+  delivered ones from the live work. Three states matter:
+  - no tick and no active task: never started. That is a backlog item nobody
+    decided on, and it goes under `Needs a decision`.
+  - some ticks and no active task: **stalled half-built**, which is the worst
+    state a feature can be in and the one nothing else would report. It goes
+    under `Needs a decision` with the count of criteria left.
+  - every criterion ticked: delivered. It contributes to the counters and is
+    named nowhere else, because a finished feature is not current state.
+- the specs carrying an unresolved `[Question]`
 
 Never read `docs/archive/`. Counts come from filenames, not content.
 
@@ -67,9 +78,10 @@ Updated: <YYYY-MM-DD>
 
 ## Needs a decision
 - <unresolved [Question] in an active task or its spec>
-- <spec with no task yet: path>
+- <spec never started: path>
+- <spec stalled: path, <n> criteria left, no active task>
 
-Active: <n> | Started: <n> | Archived: <n>
+Active: <n> | Started: <n> | Archived: <n> | Features: <n>/<n> delivered
 ```
 
 `Started` counts active tasks whose branch already holds commits. A task started

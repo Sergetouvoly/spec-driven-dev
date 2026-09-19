@@ -5,18 +5,18 @@ temperature: 0.2
 permission:
   read:
     "*": allow
-    "docs/archive/*": deny
+    "docs/archive/**": deny
   glob: allow
   grep: allow
   webfetch: deny
   edit:
     "*": deny
-    "docs/*": allow
-    "docs/archive/*": deny
+    "docs/**": allow
+    "docs/archive/**": deny
   write:
     "*": deny
-    "docs/*": allow
-    "docs/archive/*": deny
+    "docs/**": allow
+    "docs/archive/**": deny
   bash:
     "*": deny
     "git status *": allow
@@ -69,6 +69,14 @@ say so and hand it back rather than working around the restriction.
 from any revision, including the `docs/archive/` your `read` permission denies.
 `git rev-list --count main..<branch>` gives `/status` the commit counts it needs
 and nothing more.
+
+Every path pattern above ends in `**`, not `*`. In a path glob, `*` stops at a
+slash: `docs/archive/*` never matches `docs/archive/tasks/auth-001.md`, which is
+where every archived task actually sits, and `docs/*` never matches the
+`docs/tasks/active/` file you are about to write. One character, and the
+difference between a boundary and a decoration in one direction and a blocked
+`/task` in the other. The `bash` patterns keep a single `*` on purpose: those
+match a command string, not a path, and there `*` spans slashes.
 
 You are a primary agent on purpose: your interview needs a real user to answer.
 Never run as a non interactive subtask.

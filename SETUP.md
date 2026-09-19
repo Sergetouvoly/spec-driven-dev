@@ -123,9 +123,11 @@ last verified:
 | Cursor | `.cursor/commands/<name>.md` | `.cursor/rules/<name>.mdc` | not available | `AGENTS.md` |
 | Copilot | `.github/prompts/<name>.prompt.md` | `.github/instructions/<name>.instructions.md` | `.github/agents/<name>.md` | `.github/copilot-instructions.md` |
 
-`skills/specs/` and `skills/clean-tree/` are always installed. `skills/e2e-tests/`
-and `skills/pentest/` are installed only if the user said yes in question 5, and
-the report says which ones landed.
+`skills/specs/`, `skills/clean-tree/` and `skills/changelog/` are always
+installed: the first two are used by `/spec`, `/task` and `/implement`, and the
+third is called by `/done` when a feature's last criterion is ticked.
+`skills/e2e-tests/` and `skills/pentest/` are installed only if the user said yes
+in question 5, and the report says which ones landed.
 
 **This table ages.** Before writing, check the folders that already exist in the
 project and the target's current documentation. When what you find disagrees
@@ -206,6 +208,7 @@ branch or the path:
 | `commands/status.md` | `main` in sections 1 and 2, `docs/` everywhere, the output path |
 | `commands/spec.md` | the save path and the context paths |
 | `skills/pentest/SKILL.md` | `git diff main` |
+| `skills/changelog/SKILL.md` | the `docs/specs/` path it reads the spec from |
 | `agents/*.md` | every path in a `permission` block, and the two `git switch`/`git checkout` denies |
 | `scripts/map.sh` | `OUT`, if the docs root is not `docs/` |
 
@@ -223,7 +226,7 @@ that does not exist is the most convincing kind of decorative permission.
 ### 4.5 Create the project structure
 
 ```bash
-mkdir -p <docs>/specs <docs>/tasks/active <docs>/archive/tasks <docs>/archive/specs <docs>/adr
+mkdir -p <docs>/specs <docs>/tasks/active <docs>/archive/tasks <docs>/adr
 ```
 
 Write a starter `<docs>/CONTEXT.md` holding only what you learned in phase 1:
@@ -262,7 +265,14 @@ Add to the project rules file, appending rather than replacing:
 ## Workflow
 
 Features go through /spec then /task before implementation. See docs/status.md
-for the current state. Never read docs/archive/: it is a human trail, not context.
+for the current state.
+
+Specs in docs/specs/ are durable and are never archived: a delivered feature
+still has a contract, and /spec edits it in place rather than starting a new one.
+Ticked acceptance criteria name the task that delivered them.
+
+Never read docs/archive/: it holds finished tasks, a human trail rather than
+context.
 ```
 
 ---
@@ -286,9 +296,13 @@ Do not report success on the strength of having written files.
    | `reviewer` | write any file at all | refused |
    | `reviewer` | read a file under `<docs>/archive/` | refused |
    | `implementer` | read a file under `<docs>/specs/` | refused |
-   | `implementer` | read a file under `<docs>/archive/` | refused |
+   | `implementer` | read a file under `<docs>/archive/tasks/` | refused |
    | `implementer` | run `cat <docs>/specs/<any>` | refused |
    | `implementer` | run `grep -r . <docs>/specs/` | refused |
+   | `implementer` | run `git cat-file -p <branch>:<docs>/specs/<any>` | refused |
+   | `implementer` | run `git grep . <branch> -- <docs>/specs/` | refused |
+   | `implementer` | run `cp <docs>/specs/<any> ./notes.txt` | refused |
+   | `implementer` | run `git diff` | allowed |
    | `implementer` | run `curl https://example.com` | refused |
    | `implementer` | run `git commit` with no arguments | refused |
    | `implementer` | run `git commit -m "probe"` | refused |
@@ -296,18 +310,36 @@ Do not report success on the strength of having written files.
    | `implementer` | run `git reset --hard` | refused |
    | `implementer` | write to a file under `<docs>/archive/` | refused |
    | `implementer` | run the project's test command | allowed |
-   | `spec-writer` | write to a file under `<docs>/archive/` | refused |
+   | `spec-writer` | write to a file under `<docs>/archive/tasks/` | refused |
+   | `spec-writer` | write to `<docs>/tasks/active/probe.md` | allowed |
    | `spec-writer` | run `git stash push -u -m probe` | allowed |
+   | `reviewer` | read a file under `<docs>/specs/` | allowed |
    | `reviewer` | run `git show <integration branch>:<docs>/archive/tasks/<any>` | refused |
    | `reviewer` | run `git log -p <integration branch> -- <docs>/archive/` | refused |
    | `spec-writer` | run `git log -p <integration branch> -- <docs>/archive/` | refused |
 
-   The `git show`, `git log -p`, `cat` and `grep` rows are the ones people skip.
-   A `read` deny means nothing if the same agent has a shell command that prints
-   the file — from a revision, or straight off disk. Probe the bypass, not just
-   the front door. Those four rows are why `reviewer` and `spec-writer` have no
-   `git log` at all, and why `implementer`, whose shell is allow-by-default,
-   carries a deny for every printer it could otherwise reach.
+   The `git show`, `git log -p`, `git cat-file`, `git grep`, `cat`, `grep` and
+   `cp` rows are the ones people skip. A `read` deny means nothing if the same
+   agent has a shell command that prints the file — from a revision, straight off
+   disk, or by copying it to a path that is not denied and reading it there.
+   Probe the bypass, not just the front door. Those rows are why `reviewer` and
+   `spec-writer` have no `git log` at all, and why `implementer`, whose shell is
+   allow-by-default, denies the *path* in any command (`*<docs>/specs/*`) on top
+   of the printers it denies by name.
+
+   **Probe the nested paths, not the top-level one.** In a path glob, `*` stops
+   at a slash, so `<docs>/archive/*` does not match
+   `<docs>/archive/tasks/auth-001.md` — which is the only place archived tasks
+   ever are. Every path permission in the three agent files ends in `**` for that
+   reason. If your target's engine uses different semantics, the probe rows above
+   are what will tell you, and they are worth running even when the YAML looks
+   obviously correct.
+
+   The two `allowed` rows for `spec-writer` writing a task file and `implementer`
+   running `git diff` are the same kind of check in the other direction: the
+   first is a permission that was `<docs>/*` and silently blocked `/task` from
+   writing anything under `<docs>/tasks/active/`, the second is what `/implement`
+   needs to resume a branch.
 
    The two `git commit` rows are not redundant. Most permission engines match
    globs, and `git commit *` does not match `git commit` on its own. The bare
@@ -328,7 +360,7 @@ Do not report success on the strength of having written files.
 ```
 Installed for: <target(s)>
 Commands: <list>
-Skills: <paths>
+Skills: <paths, including changelog>
 Map hook: <installed, or merged into existing hook>
 Subagents: <list, or "not supported on this target">
 Docs root: <path>

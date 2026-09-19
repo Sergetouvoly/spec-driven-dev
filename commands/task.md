@@ -30,10 +30,20 @@ supervision. If a task cannot run unsupervised, it is too big: split it again.
 
 Rules:
 
-- Every numbered behavior of the spec appears in the `covers` of at least one task.
+- **You split the unticked criteria, and only those.** Every unticked criterion
+  under the spec's `## Acceptance criteria` appears in the `covers` of at least
+  one task.
+- **A ticked criterion is already delivered**, and carries the id of the task
+  that delivered it. Leave it out of every `covers`, and leave the tick alone.
+  This is how a spec is split a second time without rebuilding what already
+  works: the spec itself records what is done, so nothing has to be read out of
+  the archive to find out.
 - No behavior appears in two tasks.
 - Tasks are ordered by dependency: a task never needs a later one to be done.
 - Aim for 2 to 6 tasks. More than 8 means the spec itself should be split.
+
+If every criterion is already ticked, there is nothing to split: say so and STOP.
+The feature is delivered, and a change to it starts at `/spec`.
 
 ## 3. Numbering
 
@@ -130,7 +140,7 @@ to merge, which is the one moment nobody should be trusted with it.
 ## 5. Report and stop
 
 Tasks: <count> in docs/tasks/active/
-Coverage: <n>/<n> behaviors
+Coverage: <n>/<n> unticked criteria <, <m> already delivered>
 Manual criteria: <count>
 Next: review them, then run /implement
 

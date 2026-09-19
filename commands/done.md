@@ -79,16 +79,29 @@ would be needed, stop and hand the remainder to the user. Non-blocking findings
 go under `## Follow-up` in the task file, or become an `--adhoc` task if they
 need their own branch.
 
-## A3. Spec truth
+## A3. Spec drift, noted here and written on `main`
 
 A task with no `spec` skips this section: there is no contract behind its
 criteria, and the task file is already the record.
 
 Otherwise, if implementation showed a criterion to be wrong, incomplete or
-ambiguous, update the spec now and note the change in its
-`Open questions and assumptions`.
-A spec that reaches the archive while lying is worse than no spec: it is what
-you will read in six months.
+ambiguous, append it to the task file:
+
+```markdown
+## Spec drift
+<B id>. <what the spec claims> — <what the code showed> — <what the spec should say>
+```
+
+**Do not edit the spec here.** You are on the branch, and the spec lives on
+`main`. An edit made here is staged by nothing — A4 stages the code and this
+task's file, nothing else under `docs/` — so it would ride the working tree
+across the switch and the merge, and on the pull request path it would be lost
+outright: only what you pushed goes in. Phase B applies it on `main`, where the
+spec actually lives, and the note reaches phase B because the task file is
+committed in A4.
+
+A spec left lying is worse than no spec: it is what you will read in six months,
+and it is now a document that stays in `docs/specs/` for good.
 
 ## A4. Commit and merge
 
@@ -134,33 +147,71 @@ Then merge into `main`:
 Task state only becomes real on `main`. Archiving on a feature branch leaves
 every other session reading a stale `active/`.
 
-## B1. Archive
+## B1. Write the spec, archive the task
 
-On `main`, move the task file to `docs/archive/tasks/`.
+You are on `main`. Three things happen here, in this order.
 
-Move its spec to `docs/archive/specs/` too, but only when both hold:
+**1. Tick what this task proved.** In the spec's `## Acceptance criteria`, tick
+each criterion this task's `covers` names, and put the id after it:
 
-- every task covering that spec now sits in the archive, **and**
-- the spec carries no unresolved `[Question]`
+```markdown
+- [ ] **B1.** Three failed attempts lock the account for 15 minutes.
+- [x] **B1.** Three failed attempts lock the account for 15 minutes. (auth-001)
+```
 
-A dropped task lands in the archive like a finished one, and `/drop` writes
-`[Question] B1 dropped with <id>: still wanted?` into the spec on its way out.
-Archiving on the first condition alone would file that question away in the one
-folder no agent may read — the behavior would be neither built nor decided, and
-nothing would ever surface it again. A spec with an open question stays in
-`docs/specs/`, where `/status` keeps reporting it under `Needs a decision`.
+Tick only what `verify` proved or the user confirmed in A1. This is the whole of
+the spec-to-task direction, and it is why no index file exists: open the spec and
+the criteria tell you which task delivered each behavior, while the unticked ones
+are exactly what is left to build. `/task` re-splits from that, and `/status`
+counts it. It is written by this command at the one moment it becomes true,
+never by hand.
 
-Nothing in `docs/archive/` is ever read again by an agent. It is a human trail.
+**2. Apply the `## Spec drift` note**, if A3 wrote one: correct the criterion and
+record the change in the spec's `Open questions and assumptions`. A corrected
+criterion keeps its number. Numbers are never reused and never reassigned:
+tasks, tests and commits refer to them.
 
-## B2. Refresh and report
+**3. Move the task file** to `docs/archive/tasks/`.
 
-Regenerate `docs/status.md` as defined in `/status`. Commit the archive move and
-the status together on `main` with the message `done: <id>`.
+**The spec is never archived.** It stays in `docs/specs/` after every one of its
+tasks is finished, because a delivered feature is the one whose contract you will
+need most: to evolve it, to re-split what a `/drop` reopened, and for the
+reviewer to check the next task against it. Archiving it would file the contract
+in the one folder no agent may read, and the feature could never move again.
+Tasks are the work, and work finishes. The spec is the contract, and the contract
+holds as long as the feature is in the product.
+
+Nothing in `docs/archive/` is ever read again by an agent. It is a human trail of
+the work, not of the contract.
+
+## B2. Changelog, but only when the feature is finished
+
+If this task's spec now has **no unticked criterion left**, the feature is
+delivered: follow the `changelog` skill for that spec, once. Otherwise skip this
+section and say nothing about it.
+
+A task is not a product change. Twelve tasks can land before a user sees
+anything, and a changelog with one line per task is the archive again, in a file
+humans were promised they could read. So the unit here is the feature, the
+wording comes from the spec's `## Objective` rather than from a commit subject,
+and the entry is written at the one moment the feature became true.
+
+An unticked criterion left by `/drop` keeps the feature out of the changelog on
+purpose: it carries a `[Question] still wanted?`, and a feature announced while
+one of its promises is still undecided is an announcement you will have to take
+back.
+
+## B3. Refresh and report
+
+Regenerate `docs/status.md` as defined in `/status`. Commit the archive move, the
+spec edits from B1, the changelog entry if there is one, and the status together
+on `main` with the message `done: <id>`.
 
 Task <id>: done and merged
 Proof: verify exit 0 | confirmed by hand, no exit code
 Checks: <list, or none>
 Follow-up: <count>
+Spec: <n>/<n> criteria ticked <, feature delivered>
 Remaining: <count> in docs/tasks/active/
 Next: <id> <title>, run /implement
 

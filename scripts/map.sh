@@ -13,9 +13,16 @@ set -eu
 OUT="docs/MAP.md"
 HASH_FILE=".git/map.hash"
 DEPTH="${MAP_DEPTH:-3}"
-EXCLUDE='^(docs/archive/|\.kilo/|\.github/)'
+# Agent configuration folders are excluded: the map is for finding project code,
+# and every target installs the same workflow under a different dotted name.
+EXCLUDE='^(docs/archive/|\.(kilo|kilocode|claude|opencode|cursor|agents|github)/)'
 
 cd "$(git rev-parse --show-toplevel)"
+
+# Own temp file, removed on any exit. A fixed /tmp path is shared by every
+# repository on the machine and by every concurrent commit in this one.
+PATHS="$(mktemp "${TMPDIR:-/tmp}/map.paths.XXXXXX")"
+trap 'rm -f "$PATHS"' EXIT HUP INT TERM
 
 # Tracked files plus staged additions, minus staged deletions. That is what
 # the commit will contain, so the map matches the commit, not the previous one.
@@ -41,7 +48,7 @@ printf '%s\n' "$files" | awk -v depth="$DEPTH" '
 END {
   for (k in dirs) seen[k] = 1
   for (k in seen) print k
-}' | sort > /tmp/map.paths
+}' | sort > "$PATHS"
 
 {
   echo "# Map"
@@ -59,7 +66,7 @@ END {
     for (i = 0; i < lvl; i++) indent = indent "  "
     name = isdir ? p[n-1] "/" : p[n]
     print indent name
-  }' /tmp/map.paths
+  }' "$PATHS"
   echo '```'
   echo
   echo "Tracked files: $(printf '%s\n' "$files" | wc -l | tr -d ' ')"

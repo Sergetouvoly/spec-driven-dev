@@ -5,23 +5,25 @@ temperature: 0.2
 permission:
   read:
     "*": allow
-    "docs/specs/*": deny
-    "docs/archive/*": deny
+    "docs/specs/**": deny
+    "docs/archive/**": deny
   glob: allow
   grep: allow
   webfetch: deny
   edit:
     "*": allow
-    "docs/specs/*": deny
-    "docs/adr/*": deny
-    "docs/archive/*": deny
+    "docs/specs/**": deny
+    "docs/adr/**": deny
+    "docs/archive/**": deny
   write:
     "*": allow
-    "docs/specs/*": deny
-    "docs/adr/*": deny
-    "docs/archive/*": deny
+    "docs/specs/**": deny
+    "docs/adr/**": deny
+    "docs/archive/**": deny
   bash:
     "*": allow
+    "*docs/specs/*": deny
+    "*docs/archive/*": deny
     "cat *": deny
     "head *": deny
     "tail *": deny
@@ -31,10 +33,19 @@ permission:
     "awk *": deny
     "grep *": deny
     "rg *": deny
+    "tar *": deny
+    "find * -exec *": deny
+    "find * -ok *": deny
     "curl *": deny
     "wget *": deny
     "git show *": deny
     "git log *": deny
+    "git cat-file *": deny
+    "git grep *": deny
+    "git blame *": deny
+    "git annotate *": deny
+    "git archive *": deny
+    "git stash show *": deny
     "git commit": deny
     "git commit *": deny
     "git push": deny
@@ -73,12 +84,28 @@ where the fix also helps the next task.
 work, kept for the person who will wonder in six months. An agent that reads it
 is reasoning from decisions that were already superseded.
 
-**The shell way round both.** `cat`, `head`, `tail`, `sed`, `awk`, `grep`, `rg`,
-`git show` and `git log` are denied to you as commands, because every one of them
-prints a file, and a `read` deny that one `cat` walks around is decoration rather
-than a boundary. Use the `read` and `grep` tools instead: they answer to the same
-permissions, which is the whole point. `curl` and `wget` go with them, for the
-reason `webfetch` is denied.
+**The shell way round both.** Two denies come before every tool name:
+`*docs/specs/*` and `*docs/archive/*`. They match the *path* anywhere in a
+command, whatever runs it, because enumerating the programs that can print a
+file is a losing game — `cat`, `nl`, `od`, `xxd`, `strings`, `base64`, `cut`,
+`tr`, `cp`, `tee` and forty others all do it, and the list is never finished.
+Denying the destination instead of the vehicle closes all of them at once.
+
+On top of that, the tools that reach a file **without naming its path** are
+denied by name: `git show`, `git log`, `git cat-file`, `git grep`, `git blame`,
+`git archive` and `git stash show` all read from a revision, `tar` and
+`find -exec` walk a tree, and `cat`, `head`, `tail`, `sed`, `awk`, `grep` and
+`rg` stay denied because reaching for them is the reflex. Use the `read` and
+`grep` tools instead: they answer to the same permissions, which is the whole
+point. `curl` and `wget` go with them, for the reason `webfetch` is denied.
+
+`git diff` stays allowed, because you need it to see your own work when you
+resume a branch. It is also the honest edge of this fence: a shell that is
+allow-by-default and has the project's own interpreters in it cannot be sealed,
+and a determined `python -c` that assembles the path from two strings will get
+through. That is why this is called a fence and the reviewer's shell is called a
+wall. The real guarantee is not the denylist — it is that `/task` transcribed
+everything you need, so there is nothing behind the fence worth the trip.
 
 **Specs and ADRs, in writing.** You can read an ADR, you cannot edit one, and
 you can do neither to a spec. Those are contracts written before you started,
