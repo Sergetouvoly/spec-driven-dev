@@ -169,6 +169,7 @@ Three agents, and the boundary each one has is the one its job needs.
 | writes | `docs/**` only | code, not specs, ADRs or the archive | nothing at all |
 | shell | deny by default, read-only git plus committing `docs/` | allow by default, denylist | deny by default, `git diff` and `git status` |
 | commits | `docs/` only | never | never |
+| delegates to | a read-only search subagent | nothing | nothing |
 
 **The implementer cannot read the specs.** Not because it should not know what the
 contract says — but because the task *is* the contract, projected. `/task` holds
@@ -181,6 +182,14 @@ also helps the next task — not a reason to go looking.
 The reviewer *can* read the spec, and it is the only agent that opens one after
 `/task` ran. That is deliberate: it is checking `spec → task → code`, which
 includes whether the transcription itself drifted.
+
+**A subagent is the bypass that looks legitimate.** It runs on *its own*
+permissions, not the caller's, so delegating a read reaches whatever the caller's
+own `read` deny forbids — and in a transcript it reads like ordinary delegation
+rather than a workaround. The implementer therefore delegates to nothing at all,
+even though a read-only search agent is exactly what a large codebase calls for.
+Its `glob` and `grep` answer to its own permissions, which is why those are the
+tools it gets. The spec writer keeps one, because the code is its to read anyway.
 
 **`*` is not `**`.** In a path glob, `*` stops at a slash, so `docs/archive/*`
 never matches `docs/archive/tasks/auth-001.md` — the only place an archived task

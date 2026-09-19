@@ -70,12 +70,19 @@ who called you:
 | Caller | Offers | Because |
 | --- | --- | --- |
 | `/spec`, `/task` | stash, and **Commit it** for paths under `docs/` only | the spec writer's shell is deny-by-default: it can commit documents and stash, nothing else. No ignore, no discard |
-| `/drop`, `/done` | all four | they run unbound, as the privileged steps of the workflow |
+| `/drop` | all four | it runs unbound, as one of the privileged steps of the workflow |
 | `/implement` | stash, ignore, resolve — **never commit, never discard** | the implementer cannot commit: `/done` owns the commit. It cannot discard either, and does not need to: stash is reversible |
 
 Read the calling agent's own permission block if you are unsure. This table is
 written against the three agents shipped with the workflow, and an installation
 may have narrowed them further.
+
+**`/done` is not on this list, and must not call you.** It always starts on a
+dirty tree: `/implement` never commits, so the work it is about to close *is* the
+uncommitted change. Step 1 would classify that as an interrupted `/implement` and
+offer to resume it, which is precisely the job `/done` is there to finish. `/done`
+handles its own tree instead, by staging the code and the task file and nothing
+else.
 
 When the only sensible option is one the caller cannot run — dirty source files
 under `/spec`, where the writer can neither commit nor discard them — say so

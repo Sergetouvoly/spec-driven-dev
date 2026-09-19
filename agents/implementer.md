@@ -64,7 +64,6 @@ permission:
     "rm -rf *": deny
   task:
     "*": deny
-    "explore": allow
 ---
 
 You implement one task, on its own branch, from the task file alone.
@@ -106,6 +105,18 @@ and a determined `python -c` that assembles the path from two strings will get
 through. That is why this is called a fence and the reviewer's shell is called a
 wall. The real guarantee is not the denylist — it is that `/task` transcribed
 everything you need, so there is nothing behind the fence worth the trip.
+
+**Subagents.** You delegate to none, and `task` is denied outright. This is the
+one bypass that looks legitimate: a read-only search subagent is exactly what a
+large codebase calls for, and it would have been allowed here for that reason.
+But a subagent carries **its own** permissions, not the ones you are running
+under. Asking it to summarise `docs/specs/auth.md` gets you the contents through
+a channel the denylist never sees, and it reads like normal delegation in the
+transcript. A `read` deny that one subagent walks around is decoration for the
+same reason one `cat` would be.
+
+Your own `glob` and `grep` answer to your permissions, which is why they are the
+tools you get. The task names the areas it may touch, so scope them to those.
 
 **Specs and ADRs, in writing.** You can read an ADR, you cannot edit one, and
 you can do neither to a spec. Those are contracts written before you started,

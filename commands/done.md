@@ -14,7 +14,8 @@ where a pull request drops you — you merged it on the host, pulled, and the
 branch is gone. If several tasks carry the marker, list them and ask. If none
 does, say so: there is nothing here to close, and the id was worth typing.
 
-This command runs in two phases. Phase A verifies and merges. Phase B archives.
+This command runs in two phases. Phase A verifies and merges. Phase B writes the
+spec, archives the task and records what shipped.
 If `merged: true` in the frontmatter, the branch is already in, so skip to
 phase B.
 
@@ -132,7 +133,7 @@ Covers: <B ids>
 Then merge into `main`:
 
 - direct: `git switch main`, `git merge --no-ff <branch>`, delete the branch,
-  set `merged: true`, continue to phase B. The marker is committed in B2, on
+  set `merged: true`, continue to phase B. The marker is committed in B3, on
   `main`, together with the archive move.
 - pull request: set `merged: true` in the task file **before the commit above**,
   so the marker is in the commit and in the push. Then push, open the PR, and
@@ -184,8 +185,9 @@ the work, not of the contract.
 
 ## B2. Changelog, but only when the feature is finished
 
-If this task's spec now has **no unticked criterion left**, the feature is
-delivered: follow the `changelog` skill for that spec, once. Otherwise skip this
+If this task's spec now has **no unticked criterion left** — criteria struck
+through with `~~` being withdrawn rather than pending — the feature is delivered:
+follow the `changelog` skill for that spec, once. Otherwise skip this
 section and say nothing about it.
 
 A task is not a product change. Twelve tasks can land before a user sees

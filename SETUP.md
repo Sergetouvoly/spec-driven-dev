@@ -176,7 +176,7 @@ and record what you did:
 | `spec-writer` cannot touch source | same, in prose | the model usually complies, nothing stops it |
 | `agent:` binding a command to an agent | translate the agent's permissions into the command's `allowed-tools` | the boundary holds for that command, not for the agent everywhere |
 | `implementer` cannot read `docs/specs/` | same, in prose | the token saving becomes a habit rather than a fact; `/task` must still fill `## Notes` |
-| the built-in `explore` subagent, allowed in `task:` for two agents | use the target's own read-only search agent, whatever it is called, and rename it in both agent files | codebase sweeps happen in the main context, and cost it |
+| the built-in `explore` subagent, allowed in `task:` for `spec-writer` only | use the target's own read-only search agent, whatever it is called, and rename it in that agent file | codebase sweeps happen in the main context, and cost it |
 | `e2e` / `pentest` skills the user declined | leave both out, and out of `checks` | `/done` stops on a check whose skill is missing, by design |
 | Command invocation | a prompt file the user opens | same content, different trigger |
 
@@ -288,6 +288,8 @@ Do not report success on the strength of having written files.
    | `implementer` | run `git grep . <branch> -- <docs>/specs/` | refused |
    | `implementer` | run `cp <docs>/specs/<any> ./notes.txt` | refused |
    | `implementer` | run `git diff` | allowed |
+   | `implementer` | delegate to any subagent, e.g. `explore` | refused |
+   | `explore` (as `spec-writer` calls it) | read a file under `<docs>/archive/tasks/` | refused |
    | `implementer` | run `curl https://example.com` | refused |
    | `implementer` | run `git commit` with no arguments | refused |
    | `implementer` | run `git commit -m "probe"` | refused |
@@ -319,6 +321,16 @@ Do not report success on the strength of having written files.
    reason. If your target's engine uses different semantics, the probe rows above
    are what will tell you, and they are worth running even when the YAML looks
    obviously correct.
+
+   **A subagent is the bypass that looks legitimate.** It runs on its own
+   permissions, not the caller's, so delegating a read is how an agent reaches
+   what its own `read` deny forbids — and in a transcript it looks like ordinary
+   delegation rather than a workaround. `implementer` therefore has `task`
+   denied outright. `spec-writer` keeps `explore`, because the sweep is worth it
+   and the code is its to read anyway, so give `explore` the same
+   `<docs>/archive/**` deny and probe it. If your target's read-only search agent
+   cannot be constrained, say so in the report: the archive deny then holds for
+   `spec-writer` and not for what it delegates.
 
    The two `allowed` rows for `spec-writer` writing a task file and `implementer`
    running `git diff` are the same kind of check in the other direction: the

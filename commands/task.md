@@ -32,7 +32,8 @@ Rules:
 
 - **You split the unticked criteria, and only those.** Every unticked criterion
   under the spec's `## Acceptance criteria` appears in the `covers` of at least
-  one task.
+  one task. A criterion struck through with `~~` is withdrawn, not pending:
+  skip it, whatever its box says.
 - **A ticked criterion is already delivered**, and carries the id of the task
   that delivered it. Leave it out of every `covers`, and leave the tick alone.
   This is how a spec is split a second time without rebuilding what already

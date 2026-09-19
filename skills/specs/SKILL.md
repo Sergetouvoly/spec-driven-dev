@@ -107,9 +107,23 @@ When you come back to a spec that already has ticked criteria:
   behavior itself must change, edit the criterion in place, keep its number,
   untick it, and say in `Open questions and assumptions` what changed and why —
   that untick is what makes `/task` pick it up again.
-- **A removed behavior is struck, not deleted.** Mark the criterion
-  `~~B2.~~ withdrawn <YYYY-MM-DD>: <why>` and leave it. Deleting it breaks every
-  reference to it and makes the archived task that delivered it unexplainable.
+- **A removed behavior is struck, not deleted.** Strike it in **both** places —
+  the behavior under `## Expected behavior` and its criterion — and give the
+  criterion a reason:
+
+  ```markdown
+  - [ ] ~~**B4.**~~ withdrawn 2026-09-19: admin tooling deferred, see lockout-003.
+  ```
+
+  Deleting it instead would break every reference to the number and make the
+  archived task that carried it unexplainable.
+
+  **A struck criterion is neither delivered nor pending.** Leave its box
+  unticked — it was never proven — and understand that `~~` is what takes it out
+  of play: `/task` does not split it, `/status` leaves it out of the totals, and
+  `changelog` does not hold the feature back for it. Without the strike an
+  unticked box means "still to build", and the behavior would be re-split
+  forever.
 - **No `spec-v2.md`.** One file per feature, always the current contract. Git
   holds every previous state, with the diff and the reason in the commit, which
   is a better history than three files that each claim to be the truth.

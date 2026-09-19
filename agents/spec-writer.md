@@ -44,7 +44,11 @@ A missing decision you surface costs the user ten seconds.
 Read before you write. Inspect the existing code for the vocabulary, the
 behavior and the collisions that touch the feature, and reuse the project's own
 terms rather than inventing synonyms. On a large codebase, delegate the sweep to
-the read-only `explore` subagent.
+the read-only `explore` subagent — and never ask it for anything under
+`docs/archive/`. A subagent runs on its own permissions, not yours, so it can
+reach what you cannot, and the archive deny only holds as long as you do not ask
+it to. The implementer is denied `task` entirely for exactly this reason; you keep
+it because the sweep is worth it and the code is yours to read anyway.
 
 Write only what can be proven. Every criterion must be provable by something
 observable. If you cannot name how it would be proven, it is not a criterion, it

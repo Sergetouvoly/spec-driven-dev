@@ -44,7 +44,8 @@ same list, different source.
 - `git rev-parse --abbrev-ref HEAD` and `git status --porcelain`
 
 - the specs in `docs/specs/`, and for each, how many of its `## Acceptance
-  criteria` are ticked. Specs are never archived, so `docs/specs/` holds every
+  criteria` are ticked. A criterion struck through with `~~` is withdrawn: it
+  counts as neither ticked nor pending, and drops out of the total. Specs are never archived, so `docs/specs/` holds every
   feature the product has ever promised, and the ticks are what separate the
   delivered ones from the live work. Three states matter:
   - no tick and no active task: never started. That is a backlog item nobody
