@@ -16,11 +16,25 @@ installing nothing.
 ## Phase 0. Get the source
 
 You need the source files from this repository: `commands/`, `agents/` and
-`skills/`, all at the root. If you are not already running inside a clone:
+`skills/`. Take them from the first place that has them:
+
+1. `.specloop/` in the project, put there by `npx specloop init`. Its `VERSION`
+   file names the release, and the report quotes it.
+2. The repository itself, if you are running inside a clone.
+3. Otherwise, fetch them:
+
+```bash
+npx specloop init
+```
+
+   or, without Node:
 
 ```bash
 git clone --depth 1 https://github.com/Sergetouvoly/spec-driven-dev /tmp/specloop
 ```
+
+Prefer `.specloop/`: it is committed with the project, so the next update has a
+baseline to diff against. A clone in `/tmp` leaves none.
 
 If you cannot run git or reach the network, say so and stop. Do not reconstruct
 the files from memory: you will get the details wrong, and the details are the
@@ -367,11 +381,52 @@ Unbound: /done, /drop, /status run with the main session's own permissions
 Probes: <n> of <n> behaved as expected <, and which ones did not>
 Assumptions: <anything the user did not confirm>
 
-Next: commit these files, then run /spec on your next feature.
+Version: <.specloop/VERSION, or the commit you cloned>
+
+Next: commit these files and .specloop/, then run /spec on your next feature.
 ```
 
 Then stop. Do not demonstrate the workflow on a made-up feature, and do not
 start writing code. The user chooses the first real one.
+
+---
+
+## Update
+
+Run this section instead of phases 1 to 6 when `.specloop/previous/` exists:
+`npx specloop@latest update` put the old sources there and the new ones in
+`.specloop/`. The installed files are untouched until you finish.
+
+1. **Diff.** Compare `.specloop/previous/` with `.specloop/`, file by file.
+   Ignore `VERSION`. A file that did not change needs nothing.
+2. **Find the translation.** For each changed source, find the file you
+   installed from it, using the table in 4.1 for the target the project uses.
+   The installed copy is a translation, not a copy: it carries the project's
+   answers from 4.4, the frontmatter from 4.2 and any degradation from 4.3.
+3. **Carry the change, not the file.** Apply what changed in the source to the
+   installed file, and keep what the install put there. Never overwrite an
+   installed file with the new source: that would drop the test command, the
+   branch name, the permission translation and any edit the user made.
+   A new source file is installed as in phase 4. A deleted one: show the
+   installed file and ask before removing it.
+4. **Plan and confirm**, as in phase 3: every file you will change, and what
+   changes in it. Wait for a yes.
+5. **Write**, then rerun the probes of phase 5 for any agent whose permissions
+   changed. A new deny is only real once it has been probed.
+6. **Clean up.** Delete `.specloop/previous/`. Until it is gone, `update`
+   refuses to run again, so an update never lands on top of an unfinished one.
+
+Report:
+
+```
+Updated: <old version> -> <new version>
+Changed: <installed files, one line each on what changed>
+Added / removed: <files, or none>
+Kept: <local edits you preserved that the new source would have overwritten>
+Probes: <n> of <n> behaved as expected, or not rerun: no permission changed
+
+Next: commit the changes and .specloop/ together.
+```
 
 ---
 

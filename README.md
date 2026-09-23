@@ -1,7 +1,7 @@
 # specloop
 
 A spec-driven workflow for AI coding agents. Six commands, five skills, three
-subagents, no scripts and nothing to install. Portable across Claude Code, Kilo Code, opencode, Cursor, Copilot and
+subagents, no scripts and nothing that runs in your project. Portable across Claude Code, Kilo Code, opencode, Cursor, Copilot and
 anything else that reads markdown.
 
 ```
@@ -45,16 +45,36 @@ reviewer subagent is read-only and has not seen the reasoning behind the diff.
 
 ## Install
 
-Point your coding agent at the setup guide:
+```bash
+npx specloop init
+```
+
+This copies the sources into `.specloop/` and nothing else: no dependency in
+your `package.json`, nothing written to your agent's folders. Then ask your
+coding agent:
 
 ```
-Read SETUP.md from https://github.com/Sergetouvoly/spec-driven-dev and set this project up.
+Follow .specloop/SETUP.md and set this project up.
 ```
 
 It will detect which agent you are running, ask about five questions, and write
 the files in that agent's native format.
 
-Then commit, and run `/spec` on your next feature.
+Then commit, `.specloop/` included, and run `/spec` on your next feature.
+
+No Node? Point your agent at the guide directly:
+`Read SETUP.md from https://github.com/Sergetouvoly/spec-driven-dev and set this project up.`
+
+### Update
+
+```bash
+npx specloop@latest update
+```
+
+The old sources move to `.specloop/previous/` and the new ones take their
+place. Then ask your agent to follow the `Update` section of
+`.specloop/SETUP.md`: it carries each change into the files it installed,
+without losing your test command, your branch names or your own edits.
 
 ## The loop
 
@@ -89,9 +109,10 @@ right now, `CONTEXT.md` what the words mean, the ADRs what was decided and canno
 be cheaply undone, `CHANGELOG.md` what a user got. Git holds the detailed history
 under all of it, and where the code lives is a `glob` away, always current.
 
-Nothing here runs. No script, no hook, no CLI, no dependency: there is nothing to
-install beyond the markdown itself, and nothing that has to keep working on
-someone else's platform.
+Nothing here runs. No script, no hook, no dependency: what lands in your project
+is markdown, and nothing that has to keep working on someone else's platform.
+`npx specloop` only fetches that markdown. It is not in your `package.json` and
+has no part in the workflow once the files are there.
 
 That is a deliberate boundary, and the test for it is simple. A generated file
 holding the repository's file tree sounds free — until you notice your agent's
@@ -242,6 +263,7 @@ skills/changelog/   one line per delivered feature, called by /done
 skills/e2e-tests/   optional check: proves a journey against the running app
 skills/pentest/     optional check: probes the surface a task just opened
 SETUP.md        the installer, written to be executed by an agent
+bin/specloop.js copies the above into .specloop/, nothing more
 ```
 
 Nothing is generated and there is nothing to build. The setup guide translates

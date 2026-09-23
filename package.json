@@ -1,0 +1,36 @@
+{
+  "name": "specloop",
+  "version": "0.1.0",
+  "description": "A spec-driven workflow for AI coding agents. Drops the sources into your project; your agent installs them.",
+  "bin": {
+    "specloop": "bin/specloop.js"
+  },
+  "files": [
+    "bin/",
+    "commands/",
+    "agents/",
+    "skills/",
+    "SETUP.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "spec-driven-development",
+    "ai-agents",
+    "claude-code",
+    "opencode",
+    "kilo-code",
+    "cursor",
+    "copilot"
+  ],
+  "author": "Serge Touvoly",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sergetouvoly/spec-driven-dev.git"
+  },
+  "homepage": "https://github.com/Sergetouvoly/spec-driven-dev#readme"
+}
