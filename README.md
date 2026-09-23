@@ -1,8 +1,15 @@
 # specloop
 
+[![npm](https://img.shields.io/npm/v/@sergetouvoly/specloop)](https://www.npmjs.com/package/@sergetouvoly/specloop)
+[![license](https://img.shields.io/npm/l/@sergetouvoly/specloop)](LICENSE)
+
 A spec-driven workflow for AI coding agents. Six commands, five skills, three
-subagents, no scripts and nothing that runs in your project. Portable across Claude Code, Kilo Code, opencode, Cursor, Copilot and
-anything else that reads markdown.
+subagents, and nothing that runs in your project. Portable across Claude Code,
+Kilo Code, opencode, Cursor, Copilot and anything else that reads markdown.
+
+```bash
+npx @sergetouvoly/specloop init
+```
 
 ```
 /spec  →  /task  →  /implement  →  /done
@@ -45,13 +52,24 @@ reviewer subagent is read-only and has not seen the reasoning behind the diff.
 
 ## Install
 
+Needs Node 18 or later, only for the one command below.
+
 ```bash
 npx @sergetouvoly/specloop init
 ```
 
 This copies the sources into `.specloop/` and nothing else: no dependency in
-your `package.json`, nothing written to your agent's folders. Then ask your
-coding agent:
+your `package.json`, nothing written to your agent's folders.
+
+```
+.specloop/
+├── VERSION     the release you installed, the baseline for the next update
+├── SETUP.md    the installer your agent runs
+├── commands/   agents/   skills/
+└── LICENSE
+```
+
+Then ask your coding agent:
 
 ```
 Follow .specloop/SETUP.md and set this project up.
@@ -74,7 +92,12 @@ npx @sergetouvoly/specloop@latest update
 The old sources move to `.specloop/previous/` and the new ones take their
 place. Then ask your agent to follow the `Update` section of
 `.specloop/SETUP.md`: it carries each change into the files it installed,
-without losing your test command, your branch names or your own edits.
+without losing your test command, your branch names or your own edits. It
+deletes `previous/` when it is done, and `update` refuses to run again until
+then, so two updates never stack.
+
+The `@latest` matters: without it, `npx` may reuse the version it cached the
+first time and report that there is nothing to do.
 
 ## The loop
 
@@ -264,6 +287,7 @@ skills/e2e-tests/   optional check: proves a journey against the running app
 skills/pentest/     optional check: probes the surface a task just opened
 SETUP.md        the installer, written to be executed by an agent
 bin/specloop.js copies the above into .specloop/, nothing more
+package.json    the npm package, no dependencies
 ```
 
 Nothing is generated and there is nothing to build. The setup guide translates
@@ -349,6 +373,11 @@ A spec is a checkpoint, not a ritual. If it is not preventing rework, drop it.
 
 Edit the file under `commands/`, `agents/` or `skills/` and open a pull request.
 There is nothing to build and nothing to regenerate.
+
+To release, bump `version` in `package.json` (a patch for wording, a minor for
+a changed behavior of a command), commit, then `npm publish`. Projects pick it
+up with `npx @sergetouvoly/specloop@latest update`, and the version lands in
+their `.specloop/VERSION`.
 
 Support for one more agent is a change to `SETUP.md`, not a new folder: the
 setup guide is what knows how each target lays out its files.
