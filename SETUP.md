@@ -7,6 +7,12 @@ Your job: install the specloop workflow into the user's project, in the native
 format of whatever agent you are running, adapted to how that project actually
 works.
 
+**Claude Code, opencode and Kilo Code have an installer that needs no agent.**
+If you are one of those, stop here and tell the user to run
+`npx @sergetouvoly/specloop init`: it does everything below deterministically,
+records the answers for updates, and probes the permissions it wrote. Continue
+with this guide only for another agent, or if the user cannot run Node.
+
 **Do not write a single file before phase 4.** Phases 1 to 3 gather facts and
 confirm a plan. Installing a workflow the user did not agree to is worse than
 installing nothing.
@@ -16,25 +22,11 @@ installing nothing.
 ## Phase 0. Get the source
 
 You need the source files from this repository: `commands/`, `agents/` and
-`skills/`. Take them from the first place that has them:
-
-1. `.specloop/` in the project, put there by `npx @sergetouvoly/specloop init`. Its `VERSION`
-   file names the release, and the report quotes it.
-2. The repository itself, if you are running inside a clone.
-3. Otherwise, fetch them:
-
-```bash
-npx @sergetouvoly/specloop init
-```
-
-   or, without Node:
+`skills/`, all at the root. If you are not already running inside a clone:
 
 ```bash
 git clone --depth 1 https://github.com/Sergetouvoly/spec-driven-dev /tmp/specloop
 ```
-
-Prefer `.specloop/`: it is committed with the project, so the next update has a
-baseline to diff against. A clone in `/tmp` leaves none.
 
 If you cannot run git or reach the network, say so and stop. Do not reconstruct
 the files from memory: you will get the details wrong, and the details are the
@@ -133,7 +125,7 @@ last verified:
 | --- | --- | --- | --- | --- |
 | Claude Code | `.claude/commands/<name>.md` | `.claude/skills/<name>/SKILL.md` | `.claude/agents/<name>.md` | `CLAUDE.md` |
 | Kilo Code | `.kilo/commands/<name>.md` | `.kilo/skills/<name>/SKILL.md` | `.kilo/agents/<name>.md` | `AGENTS.md` |
-| opencode | `.opencode/command/<name>.md` | `.opencode/skills/<name>/SKILL.md` | `.opencode/agent/<name>.md` | `AGENTS.md` |
+| opencode | `.opencode/commands/<name>.md` | `.opencode/skills/<name>/SKILL.md` | `.opencode/agents/<name>.md` | `AGENTS.md` |
 | Cursor | `.cursor/commands/<name>.md` | `.cursor/rules/<name>.mdc` | not available | `AGENTS.md` |
 | Copilot | `.github/prompts/<name>.prompt.md` | `.github/instructions/<name>.instructions.md` | `.github/agents/<name>.md` | `.github/copilot-instructions.md` |
 
@@ -381,9 +373,9 @@ Unbound: /done, /drop, /status run with the main session's own permissions
 Probes: <n> of <n> behaved as expected <, and which ones did not>
 Assumptions: <anything the user did not confirm>
 
-Version: <.specloop/VERSION, or the commit you cloned>
+Version: <the commit of this repository you installed from>
 
-Next: commit these files and .specloop/, then run /spec on your next feature.
+Next: commit these files, then run /spec on your next feature.
 ```
 
 Then stop. Do not demonstrate the workflow on a made-up feature, and do not
@@ -393,40 +385,27 @@ start writing code. The user chooses the first real one.
 
 ## Update
 
-Run this section instead of phases 1 to 6 when `.specloop/previous/` exists:
-`npx @sergetouvoly/specloop@latest update` put the old sources there and the new ones in
-`.specloop/`. The installed files are untouched until you finish.
+A project installed with `npx @sergetouvoly/specloop init` updates with
+`npx @sergetouvoly/specloop@latest update`, which merges each change into the
+installed files itself. What follows is for a project you installed by hand.
 
-1. **Diff.** Compare `.specloop/previous/` with `.specloop/`, file by file.
-   Ignore `VERSION`. A file that did not change needs nothing.
+1. **Diff.** Get the new sources as in phase 0, and compare them with the
+   commit of this repository you installed from, file by file.
 2. **Find the translation.** For each changed source, find the file you
-   installed from it, using the table in 4.1 for the target the project uses.
-   The installed copy is a translation, not a copy: it carries the project's
-   answers from 4.4, the frontmatter from 4.2 and any degradation from 4.3.
+   installed from it, using the table in 4.1. The installed copy is a
+   translation, not a copy: it carries the project's answers from 4.4, the
+   frontmatter from 4.2 and any degradation from 4.3.
 3. **Carry the change, not the file.** Apply what changed in the source to the
    installed file, and keep what the install put there. Never overwrite an
    installed file with the new source: that would drop the test command, the
    branch name, the permission translation and any edit the user made.
    A new source file is installed as in phase 4. A deleted one: show the
    installed file and ask before removing it.
-4. **Plan and confirm**, as in phase 3: every file you will change, and what
-   changes in it. Wait for a yes.
+4. **Plan and confirm**, as in phase 3. Wait for a yes.
 5. **Write**, then rerun the probes of phase 5 for any agent whose permissions
    changed. A new deny is only real once it has been probed.
-6. **Clean up.** Delete `.specloop/previous/`. Until it is gone, `update`
-   refuses to run again, so an update never lands on top of an unfinished one.
 
-Report:
-
-```
-Updated: <old version> -> <new version>
-Changed: <installed files, one line each on what changed>
-Added / removed: <files, or none>
-Kept: <local edits you preserved that the new source would have overwritten>
-Probes: <n> of <n> behaved as expected, or not rerun: no permission changed
-
-Next: commit the changes and .specloop/ together.
-```
+Report which files changed, what you preserved, and the probe results.
 
 ---
 

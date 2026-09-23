@@ -4,8 +4,8 @@
 [![license](https://img.shields.io/npm/l/@sergetouvoly/specloop)](LICENSE)
 
 A spec-driven workflow for AI coding agents. Six commands, five skills, three
-subagents, and nothing that runs in your project. Portable across Claude Code,
-Kilo Code, opencode, Cursor, Copilot and anything else that reads markdown.
+subagents, installed in one command for Claude Code, opencode and Kilo Code,
+and by your agent for Cursor, Copilot or anything else that reads markdown.
 
 ```bash
 npx @sergetouvoly/specloop init
@@ -52,36 +52,67 @@ reviewer subagent is read-only and has not seen the reasoning behind the diff.
 
 ## Install
 
-Needs Node 18 or later, only for the one command below.
+Needs Node 18 or later, and a git repository.
 
 ```bash
 npx @sergetouvoly/specloop init
 ```
 
-This copies the sources into `.specloop/` and nothing else: no dependency in
-your `package.json`, nothing written to your agent's folders.
+No LLM involved: the installer asks six questions, each with an answer it
+detected for you, so Enter six times is a valid install.
+
+1. **Agents**: `claude`, `opencode`, `kilo`, one or several. Detected from the
+   folders already in the project.
+2. **Docs folder**: `docs` unless you keep documentation elsewhere.
+3. **Integration branch, merge style, task branch prefix**: from `git`.
+4. **Test command**: from `package.json`, `pyproject.toml`, `Cargo.toml`,
+   `go.mod` or a `Makefile`. This is the gate `/done` runs. With none, tasks
+   close on a human yes, and the installer says so.
+5. **Optional checks**: `e2e` when an e2e runner is installed, `pentest` when
+   the project serves HTTP. Each installs its skill.
+6. **Claude Code only: the guard hook.** See below.
+
+It then shows every file it will write, and writes nothing until you say yes.
+Existing files are never overwritten unless you ask; `CLAUDE.md`, `AGENTS.md`
+and `.claude/settings.json` only get specloop's own block or hooks added.
 
 ```
-.specloop/
-├── VERSION     the release you installed, the baseline for the next update
-├── SETUP.md    the installer your agent runs
-├── commands/   agents/   skills/
-└── LICENSE
+.claude/ or .opencode/ or .kilo/   commands, agents, skills, in that agent's format
+CLAUDE.md / AGENTS.md              a delimited Workflow block with your answers
+docs/                              specs, tasks/active, archive/tasks, adr,
+                                   CONTEXT.md and status.md to start from
+.specloop/                         your answers, and every generated file as
+                                   generated: the baseline for updates
 ```
 
-Then ask your coding agent:
+It ends by checking 34 permission probes against the rules it wrote: the
+implementer cannot read a spec or commit, the reviewer cannot write, the spec
+writer cannot touch code, and so on. Then fill in `docs/CONTEXT.md`, commit
+everything, `.specloop/` included, and run `/spec` on your next feature.
 
-```
-Follow .specloop/SETUP.md and set this project up.
-```
+Every question has a flag for scripts and CI: `--targets=claude,opencode`,
+`--docs`, `--branch`, `--merge=direct|pr`, `--prefix`, `--test` or
+`--no-test`, `--checks=e2e,pentest`, `--no-guard`, `--yes`, `--dry-run`.
 
-It will detect which agent you are running, ask about five questions, and write
-the files in that agent's native format.
+### How permissions are enforced
 
-Then commit, `.specloop/` included, and run `/spec` on your next feature.
+| Agent | Enforced by |
+| --- | --- |
+| opencode, Kilo Code | the agent itself: the `permission` block of each agent file, last match wins |
+| Claude Code, guard on | `.claude/hooks/specloop-guard.js`, a hook that applies those same rules |
+| Claude Code, guard off | nothing: the rules are prose the model usually follows |
 
-No Node? Point your agent at the guide directly:
-`Read SETUP.md from https://github.com/Sergetouvoly/spec-driven-dev and set this project up.`
+Claude Code cannot hold per-agent path and command rules in an agent file, so
+the guard does it. Typing `/spec` or `/task` switches the spec writer's rules
+on, `/implement` the implementer's, and they stay on for the follow-up messages
+of that command until you type another slash command. The agent itself cannot
+switch or clear them: only what you type does. The reviewer runs as a subagent
+with its own hook. Claude Code runs project hooks once you have trusted the
+folder.
+
+The guard is the one piece of code that runs in your project. It only ever
+blocks: anything it lets through still goes through Claude Code's own
+permissions.
 
 ### Update
 
@@ -89,15 +120,27 @@ No Node? Point your agent at the guide directly:
 npx @sergetouvoly/specloop@latest update
 ```
 
-The old sources move to `.specloop/previous/` and the new ones take their
-place. Then ask your agent to follow the `Update` section of
-`.specloop/SETUP.md`: it carries each change into the files it installed,
-without losing your test command, your branch names or your own edits. It
-deletes `previous/` when it is done, and `update` refuses to run again until
-then, so two updates never stack.
+Regenerates every file with the answers you gave at install, and compares three
+versions of each: what was generated last time, what is on disk now, and what
+this version generates.
+
+- you never touched it: replaced with the new version
+- only you changed it: left alone
+- both changed: merged, with conflict markers where the two edits collide,
+  listed in the report
+- you deleted it: stays deleted
 
 The `@latest` matters: without it, `npx` may reuse the version it cached the
 first time and report that there is nothing to do.
+
+### Any other agent
+
+Cursor, Copilot, or anything else: point your agent at the setup guide, which
+does the same job by hand, in that agent's native format:
+
+```
+Read SETUP.md from https://github.com/Sergetouvoly/spec-driven-dev and set this project up.
+```
 
 ## The loop
 
@@ -132,12 +175,13 @@ right now, `CONTEXT.md` what the words mean, the ADRs what was decided and canno
 be cheaply undone, `CHANGELOG.md` what a user got. Git holds the detailed history
 under all of it, and where the code lives is a `glob` away, always current.
 
-Nothing here runs. No script, no hook, no dependency: what lands in your project
-is markdown, and nothing that has to keep working on someone else's platform.
-`npx @sergetouvoly/specloop` only fetches that markdown. It is not in your
-`package.json` and has no part in the workflow once the files are there.
+The workflow itself does not run: what lands in your project is markdown. The
+installer runs once, through `npx`, and is not in your `package.json`. The one
+exception is the Claude Code guard, a single dependency-free file that exists
+because Claude Code has no other way to hold per-agent permissions, and that
+you can decline at install.
 
-That is a deliberate boundary, and the test for it is simple. A generated file
+Beyond that, it is a deliberate boundary, and the test for it is simple. A generated file
 holding the repository's file tree sounds free — until you notice your agent's
 own `glob` answers the same question on demand, scoped to what you actually
 asked about rather than the whole tree, and always current. The generated copy
@@ -257,20 +301,20 @@ real guarantee is that there is nothing behind the fence worth the trip.
 
 ## Agent support
 
-| Agent | Commands | Skill | Subagents | Enforced permissions |
-| --- | --- | --- | --- | --- |
-| Claude Code | yes | yes | yes | yes |
-| Kilo Code | yes | yes | yes | yes |
-| opencode | yes | yes | yes | yes |
-| Cursor | yes | as a rule | no | no |
-| Copilot | as prompts | as instructions | partial | no |
-| Other | from the same source files | | | |
+| Agent | Installed by | Commands | Skill | Subagents | Enforced permissions |
+| --- | --- | --- | --- | --- | --- |
+| Claude Code | `npx` | yes | yes | yes | yes, with the guard hook |
+| Kilo Code | `npx` | yes | yes | yes | yes |
+| opencode | `npx` | yes | yes | yes | yes |
+| Cursor | SETUP.md | yes | as a rule | no | no |
+| Copilot | SETUP.md | as prompts | as instructions | partial | no |
+| Other | SETUP.md | from the same source files | | | |
 
-Read the last two columns honestly. On Claude Code, Kilo and opencode, "the spec
-writer cannot edit source files" is enforced by the tool: it will fail. On Cursor
-and Copilot the same line is a convention the model usually follows. The workflow
-still works, the guarantees become conventions. The setup guide tells you which
-of the two you got.
+Read the last column honestly. On Kilo and opencode, and on Claude Code with the
+guard, "the spec writer cannot edit source files" is enforced: the call fails.
+On Cursor and Copilot, or on Claude Code without the guard, the same line is a
+convention the model usually follows. The workflow still works, the guarantees
+become conventions, and the installer tells you which of the two you got.
 
 Not on the list? The setup guide reads your agent's existing configuration
 folder, matches the closest format and asks you to confirm before writing.
@@ -285,13 +329,19 @@ skills/clean-tree/  the skill that resolves a dirty tree instead of stopping
 skills/changelog/   one line per delivered feature, called by /done
 skills/e2e-tests/   optional check: proves a journey against the running app
 skills/pentest/     optional check: probes the surface a task just opened
-SETUP.md        the installer, written to be executed by an agent
-bin/specloop.js copies the above into .specloop/, nothing more
+SETUP.md        the installer for agents the CLI does not cover, run by the agent
+bin/specloop.js the CLI: questions, plan, report
+lib/            detection, substitution, one renderer per agent, the update merge
+lib/templates/specloop-guard.js   the Claude Code guard hook
+test/           node --test, no dependencies
 package.json    the npm package, no dependencies
 ```
 
-Nothing is generated and there is nothing to build. The setup guide translates
-these files into the format of whichever agent installs them.
+The files under `commands/`, `agents/` and `skills/` are the sources, written in
+the format opencode and Kilo read natively. They say `main`, `docs/` and
+`<branch-prefix>` in plain form so they stay readable; the tests enforce the two
+rules that make substituting them safe: `main` only ever appears inside code,
+and every `docs/` is a path.
 
 ## Design notes
 
@@ -371,16 +421,16 @@ A spec is a checkpoint, not a ritual. If it is not preventing rework, drop it.
 
 ## Contributing
 
-Edit the file under `commands/`, `agents/` or `skills/` and open a pull request.
-There is nothing to build and nothing to regenerate.
+Edit the file under `commands/`, `agents/` or `skills/`, run `npm test`, and
+open a pull request. There is nothing to build.
 
 To release, bump `version` in `package.json` (a patch for wording, a minor for
 a changed behavior of a command), commit, then `npm publish`. Projects pick it
 up with `npx @sergetouvoly/specloop@latest update`, and the version lands in
-their `.specloop/VERSION`.
+their `.specloop/config.json`.
 
-Support for one more agent is a change to `SETUP.md`, not a new folder: the
-setup guide is what knows how each target lays out its files.
+Support for one more agent is a renderer in `lib/targets.js`, a line in the
+`SETUP.md` layout table for agents installed by hand, and a test.
 
 ## License
 
