@@ -46,7 +46,7 @@ reviewer subagent is read-only and has not seen the reasoning behind the diff.
 ## Install
 
 ```bash
-npx specloop init
+npx @sergetouvoly/specloop init
 ```
 
 This copies the sources into `.specloop/` and nothing else: no dependency in
@@ -68,7 +68,7 @@ No Node? Point your agent at the guide directly:
 ### Update
 
 ```bash
-npx specloop@latest update
+npx @sergetouvoly/specloop@latest update
 ```
 
 The old sources move to `.specloop/previous/` and the new ones take their
@@ -111,8 +111,8 @@ under all of it, and where the code lives is a `glob` away, always current.
 
 Nothing here runs. No script, no hook, no dependency: what lands in your project
 is markdown, and nothing that has to keep working on someone else's platform.
-`npx specloop` only fetches that markdown. It is not in your `package.json` and
-has no part in the workflow once the files are there.
+`npx @sergetouvoly/specloop` only fetches that markdown. It is not in your
+`package.json` and has no part in the workflow once the files are there.
 
 That is a deliberate boundary, and the test for it is simple. A generated file
 holding the repository's file tree sounds free — until you notice your agent's

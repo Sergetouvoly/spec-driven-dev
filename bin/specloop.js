@@ -34,7 +34,7 @@ function installedVersion() {
 
 function init() {
   if (fs.existsSync(DEST)) {
-    fail(`.specloop/ already exists (version ${installedVersion() || 'unknown'}). Run "npx specloop@latest update" instead.`);
+    fail(`.specloop/ already exists (version ${installedVersion() || 'unknown'}). Run "npx @sergetouvoly/specloop@latest update" instead.`);
   }
   copySources(DEST);
   console.log(`specloop ${version} copied to .specloop/
@@ -51,7 +51,7 @@ Commit .specloop/ with them: it is the baseline the next update diffs against.`)
 function update() {
   const from = installedVersion();
   if (!from) {
-    fail('.specloop/ not found. Run "npx specloop init" first.');
+    fail('.specloop/ not found. Run "npx @sergetouvoly/specloop init" first.');
   }
   if (from === version) {
     console.log(`specloop ${version} is already the installed version. Nothing to do.`);
@@ -84,10 +84,11 @@ function help() {
   console.log(`specloop ${version}
 
 Usage:
-  npx specloop init      copy the workflow sources into .specloop/
-  npx specloop@latest update
-                         replace them with the latest version, keeping the old
-                         ones in .specloop/previous/ for your agent to diff
+  npx @sergetouvoly/specloop init
+      copy the workflow sources into .specloop/
+  npx @sergetouvoly/specloop@latest update
+      replace them with the latest version, keeping the old
+      ones in .specloop/previous/ for your agent to diff
 
 Then your agent follows .specloop/SETUP.md. This tool never writes anywhere
 else, and adds no dependency to your project.`);
@@ -104,5 +105,5 @@ switch (command) {
   case 'update': update(); break;
   case '--version': case '-v': console.log(version); break;
   case undefined: case 'help': case '--help': case '-h': help(); break;
-  default: fail(`unknown command "${command}". Run "npx specloop --help".`);
+  default: fail(`unknown command "${command}". Run "npx @sergetouvoly/specloop --help".`);
 }

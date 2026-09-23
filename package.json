@@ -1,5 +1,5 @@
 {
-  "name": "specloop",
+  "name": "@sergetouvoly/specloop",
   "version": "0.1.0",
   "description": "A spec-driven workflow for AI coding agents. Drops the sources into your project; your agent installs them.",
   "bin": {
@@ -32,5 +32,8 @@
     "type": "git",
     "url": "git+https://github.com/Sergetouvoly/spec-driven-dev.git"
   },
-  "homepage": "https://github.com/Sergetouvoly/spec-driven-dev#readme"
+  "homepage": "https://github.com/Sergetouvoly/spec-driven-dev#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }

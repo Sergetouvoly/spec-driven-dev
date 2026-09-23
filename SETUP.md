@@ -18,13 +18,13 @@ installing nothing.
 You need the source files from this repository: `commands/`, `agents/` and
 `skills/`. Take them from the first place that has them:
 
-1. `.specloop/` in the project, put there by `npx specloop init`. Its `VERSION`
+1. `.specloop/` in the project, put there by `npx @sergetouvoly/specloop init`. Its `VERSION`
    file names the release, and the report quotes it.
 2. The repository itself, if you are running inside a clone.
 3. Otherwise, fetch them:
 
 ```bash
-npx specloop init
+npx @sergetouvoly/specloop init
 ```
 
    or, without Node:
@@ -394,7 +394,7 @@ start writing code. The user chooses the first real one.
 ## Update
 
 Run this section instead of phases 1 to 6 when `.specloop/previous/` exists:
-`npx specloop@latest update` put the old sources there and the new ones in
+`npx @sergetouvoly/specloop@latest update` put the old sources there and the new ones in
 `.specloop/`. The installed files are untouched until you finish.
 
 1. **Diff.** Compare `.specloop/previous/` with `.specloop/`, file by file.
