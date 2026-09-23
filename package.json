@@ -1,12 +1,13 @@
 {
   "name": "@sergetouvoly/specloop",
-  "version": "0.1.0",
-  "description": "A spec-driven workflow for AI coding agents. Drops the sources into your project; your agent installs them.",
+  "version": "0.2.0",
+  "description": "A spec-driven workflow for AI coding agents, installed in each agent native format without an LLM in the loop.",
   "bin": {
     "specloop": "bin/specloop.js"
   },
   "files": [
     "bin/",
+    "lib/",
     "commands/",
     "agents/",
     "skills/",
@@ -35,5 +36,8 @@
   "homepage": "https://github.com/Sergetouvoly/spec-driven-dev#readme",
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "test": "node --test"
   }
 }
