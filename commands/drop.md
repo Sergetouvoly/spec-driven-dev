@@ -34,7 +34,8 @@ Append to the task file:
 <YYYY-MM-DD>. <reason>
 ```
 
-Move it to `docs/archive/tasks/`.
+Move it to `docs/archive/tasks/<spec-slug>/`, the same folder name it had under
+`active/`. If its active folder is now empty, remove it.
 
 If the task covered behaviors of a spec, those behaviors are now uncovered. Add
 a line to the spec's `Open questions and assumptions`:
@@ -57,4 +58,4 @@ message `drop: <id>`.
 Dropped <id>: <reason>
 Branch: <deleted, or kept with n commits>
 Uncovered behaviors: <B ids, or none>
-Remaining: <count> in docs/tasks/active/
+Remaining: <count> in docs/tasks/active/<spec-slug>/, <count> in all

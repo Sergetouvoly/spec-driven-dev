@@ -8,8 +8,8 @@ Task to close: $ARGUMENTS
 
 If empty, take the task whose `branch` matches the current git branch.
 
-On `main`, no branch matches, so take instead the task in `docs/tasks/active/`
-carrying `merged: true`: its code is in and only the archive is left. That is
+On `main`, no branch matches, so take instead the task under
+`docs/tasks/active/*/` carrying `merged: true`: its code is in and only the archive is left. That is
 where a pull request drops you — you merged it on the host, pulled, and the
 branch is gone. If several tasks carry the marker, list them and ask. If none
 does, say so: there is nothing here to close, and the id was worth typing.
@@ -170,7 +170,11 @@ record the change in the spec's `Open questions and assumptions`. A corrected
 criterion keeps its number. Numbers are never reused and never reassigned:
 tasks, tests and commits refer to them.
 
-**3. Move the task file** to `docs/archive/tasks/`.
+**3. Move the task file** to `docs/archive/tasks/<spec-slug>/`, the same
+folder name it had under `active/` (`adhoc/` for an ad-hoc task). If that was
+the last file in `docs/tasks/active/<spec-slug>/`, remove the empty folder: git
+does not track it anyway, and an empty folder left on disk reads as a feature
+still in flight.
 
 **The spec is never archived.** It stays in `docs/specs/` after every one of its
 tasks is finished, because a delivered feature is the one whose contract you will
@@ -212,7 +216,7 @@ Proof: verify exit 0 | confirmed by hand, no exit code
 Checks: <list, or none>
 Follow-up: <count>
 Spec: <n>/<n> criteria ticked <, feature delivered>
-Remaining: <count> in docs/tasks/active/
+Remaining: <count> in docs/tasks/active/<spec-slug>/, <count> in all
 Next: <id> <title>, run /implement
 
 A task closed on `verify: manual` says so on this line, and the same line goes

@@ -15,7 +15,8 @@ describes one branch, not the project.
 
 So off `main`, this command reads `main` and writes nothing:
 
-- list the tasks with `git ls-tree --name-only main docs/tasks/active/`, and
+- list the tasks with `git ls-tree -r --name-only main docs/tasks/active/`,
+  and
   read each one with `git show main:<path>`. Not `glob`, not the working tree:
   a feature branch may carry a task file that is not yet on `main`, or an
   edited copy of one that is, and either would make the status describe the
@@ -32,7 +33,9 @@ On `main`, read the working tree and write the file as described below.
 On `main`, by `glob`. Off `main`, by `git ls-tree`/`git show` as in section 1 —
 same list, different source.
 
-- the tasks in `docs/tasks/active/`, and each frontmatter
+- the tasks in `docs/tasks/active/*/`, one folder per spec slug plus `adhoc/`,
+  and each frontmatter. A spec has an active task exactly when its folder
+  holds a file
 - for each, does its branch exist (`git rev-parse --verify <branch>`), and how
   many commits it holds that `main` does not
   (`git rev-list --count main..<branch>`). Not `git log`: the count is all this
@@ -89,7 +92,8 @@ Active: <n> | Started: <n> | Archived: <n> | Features: <n>/<n> delivered
 and left is the thing a fresh session most needs to see, and the thing it is
 most likely to redo from scratch.
 
-List at most three tasks under `Next up`, drop empty sections, and never list
+List at most three tasks under `Next up`, the lowest-numbered not-yet-started
+task of each folder first, so every feature in flight shows its next step. Drop empty sections, and never list
 archived tasks: git holds that history.
 
 ## 4. Show

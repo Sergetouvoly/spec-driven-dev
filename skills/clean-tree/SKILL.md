@@ -24,7 +24,7 @@ Sort every line into one bucket:
 | conflict | `UU`, `AA`, `DD` | a merge or rebase is in progress |
 
 Then check one special case: if the current branch matches the `branch` of a
-task in `docs/tasks/active/` and that task has a `## Plan` section, this is an
+task under `docs/tasks/active/<spec-slug>/` and that task has a `## Plan` section, this is an
 interrupted `/implement`, not a dirty tree.
 
 If the caller is `/implement` on that same task, say so in one line and return:

@@ -75,9 +75,9 @@ from any revision, including the `docs/archive/` your `read` permission denies.
 and nothing more.
 
 Every path pattern above ends in `**`, not `*`. In a path glob, `*` stops at a
-slash: `docs/archive/*` never matches `docs/archive/tasks/auth-001.md`, which is
+slash: `docs/archive/*` never matches `docs/archive/tasks/auth/auth-001.md`, which is
 where every archived task actually sits, and `docs/*` never matches the
-`docs/tasks/active/` file you are about to write. One character, and the
+`docs/tasks/active/<spec-slug>/` file you are about to write. One character, and the
 difference between a boundary and a decoration in one direction and a blocked
 `/task` in the other. The `bash` patterns keep a single `*` on purpose: those
 match a command string, not a path, and there `*` spans slashes.

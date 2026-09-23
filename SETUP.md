@@ -298,10 +298,10 @@ Do not report success on the strength of having written files.
    | `implementer` | write to a file under `<docs>/archive/` | refused |
    | `implementer` | run the project's test command | allowed |
    | `spec-writer` | write to a file under `<docs>/archive/tasks/` | refused |
-   | `spec-writer` | write to `<docs>/tasks/active/probe.md` | allowed |
+   | `spec-writer` | write to `<docs>/tasks/active/probe/probe.md` | allowed |
    | `spec-writer` | run `git stash push -u -m probe` | allowed |
    | `reviewer` | read a file under `<docs>/specs/` | allowed |
-   | `reviewer` | run `git show <integration branch>:<docs>/archive/tasks/<any>` | refused |
+   | `reviewer` | run `git show <integration branch>:<docs>/archive/tasks/<slug>/<any>` | refused |
    | `reviewer` | run `git log -p <integration branch> -- <docs>/archive/` | refused |
    | `spec-writer` | run `git log -p <integration branch> -- <docs>/archive/` | refused |
 
@@ -316,7 +316,7 @@ Do not report success on the strength of having written files.
 
    **Probe the nested paths, not the top-level one.** In a path glob, `*` stops
    at a slash, so `<docs>/archive/*` does not match
-   `<docs>/archive/tasks/auth-001.md` — which is the only place archived tasks
+   `<docs>/archive/tasks/auth/auth-001.md` — which is the only place archived tasks
    ever are. Every path permission in the three agent files ends in `**` for that
    reason. If your target's engine uses different semantics, the probe rows above
    are what will tell you, and they are worth running even when the YAML looks
@@ -335,7 +335,7 @@ Do not report success on the strength of having written files.
    The two `allowed` rows for `spec-writer` writing a task file and `implementer`
    running `git diff` are the same kind of check in the other direction: the
    first is a permission that was `<docs>/*` and silently blocked `/task` from
-   writing anything under `<docs>/tasks/active/`, the second is what `/implement`
+   writing anything under `<docs>/tasks/active/<spec-slug>/`, the second is what `/implement`
    needs to resume a branch.
 
    The two `git commit` rows are not redundant. Most permission engines match

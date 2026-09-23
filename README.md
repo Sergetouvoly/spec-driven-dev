@@ -75,12 +75,12 @@ what needs a decision.
 ```
 CHANGELOG.md            one line per delivered feature, for humans
 docs/
-├── CONTEXT.md          shared vocabulary, stable
-├── status.md           generated, never edited by hand
-├── adr/                decisions that are expensive to reverse
-├── specs/              the contracts, durable, never archived
-├── tasks/active/       open work, one file per task
-└── archive/tasks/      finished work, never read by an agent again
+├── CONTEXT.md             shared vocabulary, stable
+├── status.md              generated, never edited by hand
+├── adr/                   decisions that are expensive to reverse
+├── specs/                 the contracts, durable, never archived
+├── tasks/active/<spec>/   open work, one folder per spec, one file per task
+└── archive/tasks/<spec>/  finished work, same folders, never read by an agent again
 ```
 
 Six artifacts, and each answers a question none of the others do: the spec what
@@ -116,7 +116,7 @@ SPEC  docs/specs/auth.md ──────────────────�
   │
   │  /task splits the unticked criteria
   ▼
-TASK  active/auth-001.md ──▶ branch ──▶ verify ──▶ review ──▶ archive/tasks/
+TASK  active/auth/auth-001.md ─▶ branch ─▶ verify ─▶ review ─▶ archive/tasks/auth/
   │                                                              (agents never
   │  /done ticks the criterion it proved, with the id             read it again)
   ▼
@@ -192,7 +192,7 @@ Its `glob` and `grep` answer to its own permissions, which is why those are the
 tools it gets. The spec writer keeps one, because the code is its to read anyway.
 
 **`*` is not `**`.** In a path glob, `*` stops at a slash, so `docs/archive/*`
-never matches `docs/archive/tasks/auth-001.md` — the only place an archived task
+never matches `docs/archive/tasks/auth/auth-001.md` — the only place an archived task
 ever is. Every path permission in the three agent files ends in `**`, and the
 setup guide probes the nested path rather than the folder.
 
@@ -254,7 +254,9 @@ branch is invisible to every other session until that branch merges. `/done`
 merges first, then archives.
 
 **Task numbers are scoped to their spec** (`auth-001`), so two features split in
-parallel cannot collide.
+parallel cannot collide. Tasks are filed the same way: `docs/specs/auth.md` owns
+`docs/tasks/active/auth/`, ad-hoc tasks sit in `adhoc/`, and the archive keeps
+the same folders. What is left of a feature is one `glob` away.
 
 **Every behavior is numbered and covered.** `/task` reports `n/n` coverage over
 the criteria that are still unticked, and `/drop` reopens the behaviors an

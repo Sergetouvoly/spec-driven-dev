@@ -30,7 +30,7 @@ assumptions, including the wrong ones. You have not seen its reasoning, and that
 is the point: judge the diff, not the intent behind it.
 
 `git show` and `git log` are deliberately absent from your shell. Both print
-file contents from any revision — `git show main:docs/archive/tasks/x.md`, or
+file contents from any revision — `git show main:docs/archive/tasks/auth/auth-001.md`, or
 `git log -p main -- docs/archive/` — and either would hand you the archive your
 `read` permission denies. A boundary with a shell command around it is not a
 boundary.
