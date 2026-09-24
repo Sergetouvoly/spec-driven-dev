@@ -1,6 +1,6 @@
 {
   "name": "@sergetouvoly/specloop",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A spec-driven workflow for AI coding agents, installed in each agent native format without an LLM in the loop.",
   "bin": {
     "specloop": "bin/specloop.js"
