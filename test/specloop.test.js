@@ -237,6 +237,48 @@ test('init then update: local edits survive, upstream changes arrive', () => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test('init: specs and tasks at the docs root, the rest under reference/ and workflow/', () => {
+  const dir = gitRepo();
+  const answers = { ...DEFAULTS, targets: ['claude'] };
+  install.apply(dir, answers, install.plan(dir, answers), { overwrite: false, version: '0.0.1', date: '2026-01-01', facts: { stack: [] } });
+  for (const rel of ['docs/specs', 'docs/tasks', 'docs/archive/tasks', 'docs/reference/adr', 'docs/reference/CONTEXT.md', 'docs/workflow/status.md']) {
+    assert.ok(fs.existsSync(path.join(dir, rel)), rel);
+  }
+  for (const rel of ['docs/CONTEXT.md', 'docs/status.md', 'docs/adr']) assert.ok(!fs.existsSync(path.join(dir, rel)), rel);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('update: the earlier docs layout is moved with git mv, never over something', () => {
+  const dir = gitRepo();
+  const answers = { ...DEFAULTS, targets: ['claude'] };
+  install.apply(dir, answers, install.plan(dir, answers), { overwrite: false, version: '0.0.1', date: '2026-01-01', facts: { stack: [] } });
+  // Put the project back in the earlier layout, tracked by git.
+  fs.renameSync(path.join(dir, 'docs/reference/CONTEXT.md'), path.join(dir, 'docs/CONTEXT.md'));
+  fs.mkdirSync(path.join(dir, 'docs/adr'));
+  fs.writeFileSync(path.join(dir, 'docs/adr/0001-storage.md'), '# Storage\n');
+  fs.rmSync(path.join(dir, 'docs/reference/adr'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'docs/status.md'), '# Old status\n');
+  fs.mkdirSync(path.join(dir, 'docs/tasks/active/auth'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'docs/tasks/active/auth/auth-001-login.md'), '# auth-001\n');
+  execFileSync('git', ['add', 'docs'], { cwd: dir });
+  execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', 'old layout'], { cwd: dir });
+
+  const report = install.update(dir, install.loadState(dir), '0.0.2');
+  assert.deepEqual(report.moved, [
+    'docs/CONTEXT.md -> docs/reference/CONTEXT.md',
+    'docs/adr -> docs/reference/adr',
+    'docs/tasks/active/auth -> docs/tasks/auth',
+  ]);
+  assert.ok(fs.existsSync(path.join(dir, 'docs/tasks/auth/auth-001-login.md')));
+  assert.ok(!fs.existsSync(path.join(dir, 'docs/tasks/active')));
+  assert.deepEqual(report.blocked, ['docs/status.md (docs/workflow/status.md already exists)']);
+  assert.ok(fs.existsSync(path.join(dir, 'docs/reference/adr/0001-storage.md')));
+  assert.equal(fs.readFileSync(path.join(dir, 'docs/status.md'), 'utf8'), '# Old status\n');
+  const staged = execFileSync('git', ['diff', '--cached', '--name-status', '-M'], { cwd: dir, encoding: 'utf8' });
+  assert.match(staged, /^R\d*\tdocs\/adr\/0001-storage\.md\tdocs\/reference\/adr\/0001-storage\.md$/m);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 test('update: a clash between your edit and upstream is reported, not guessed', () => {
   const dir = gitRepo();
   const answers = { ...DEFAULTS, targets: ['opencode'] };

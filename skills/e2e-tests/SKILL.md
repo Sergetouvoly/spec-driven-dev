@@ -27,7 +27,7 @@ asked for it. Name that in the verdict so the next split is better.
 ## 2. Start the real thing
 
 Start the application the way the project starts it: its own script, its own
-seed data, its own environment file. Read `docs/CONTEXT.md` and the project
+seed data, its own environment file. Read `docs/reference/CONTEXT.md` and the project
 manifest for the command rather than inventing one.
 
 Two rules, and they are the whole value of this check:

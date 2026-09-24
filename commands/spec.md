@@ -18,7 +18,7 @@ Follow the `clean-tree` skill, then continue.
 
 ## 2. Context
 
-Read `docs/CONTEXT.md` and list `docs/adr/` if they exist. Reference them from
+Read `docs/reference/CONTEXT.md` and list `docs/reference/adr/` if they exist. Reference them from
 the spec with a one-line pointer, never copy their content.
 
 Never read `docs/archive/`.

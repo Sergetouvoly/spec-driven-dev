@@ -9,7 +9,7 @@ Task to close: $ARGUMENTS
 If empty, take the task whose `branch` matches the current git branch.
 
 On `main`, no branch matches, so take instead the task under
-`docs/tasks/active/*/` carrying `merged: true`: its code is in and only the archive is left. That is
+`docs/tasks/*/` carrying `merged: true`: its code is in and only the archive is left. That is
 where a pull request drops you — you merged it on the host, pulled, and the
 branch is gone. If several tasks carry the marker, list them and ask. If none
 does, say so: there is nothing here to close, and the id was worth typing.
@@ -117,7 +117,7 @@ on a pull request, where only what you pushed goes in.
 
 This does not break the rule that task state lives on `main`. That rule is about
 the *archive move*, which changes what other sessions see and still happens on
-`main` in B1. The file stays in `active/` here; what enters the branch is the
+`main` in B1. The file stays in `docs/tasks/` here; what enters the branch is the
 record of the work the branch did, and it belongs in the same commit as the code
 it describes.
 
@@ -144,7 +144,7 @@ Then merge into `main`:
   second run of `/done` would redo phase A against a branch already merged.
 
 Task state only becomes real on `main`. Archiving on a feature branch leaves
-every other session reading a stale `active/`.
+every other session reading a stale `docs/tasks/`.
 
 ## B1. Write the spec, archive the task
 
@@ -171,8 +171,8 @@ criterion keeps its number. Numbers are never reused and never reassigned:
 tasks, tests and commits refer to them.
 
 **3. Move the task file** to `docs/archive/tasks/<spec-slug>/`, the same
-folder name it had under `active/` (`adhoc/` for an ad-hoc task). If that was
-the last file in `docs/tasks/active/<spec-slug>/`, remove the empty folder: git
+folder name it had under `docs/tasks/` (`adhoc/` for an ad-hoc task). If that was
+the last file in `docs/tasks/<spec-slug>/`, remove the empty folder: git
 does not track it anyway, and an empty folder left on disk reads as a feature
 still in flight.
 
@@ -207,7 +207,7 @@ back.
 
 ## B3. Refresh and report
 
-Regenerate `docs/status.md` as defined in `/status`. Commit the archive move, the
+Regenerate `docs/workflow/status.md` as defined in `/status`. Commit the archive move, the
 spec edits from B1, the changelog entry if there is one, and the status together
 on `main` with the message `done: <id>`.
 
@@ -216,7 +216,7 @@ Proof: verify exit 0 | confirmed by hand, no exit code
 Checks: <list, or none>
 Follow-up: <count>
 Spec: <n>/<n> criteria ticked <, feature delivered>
-Remaining: <count> in docs/tasks/active/<spec-slug>/, <count> in all
+Remaining: <count> in docs/tasks/<spec-slug>/, <count> in all
 Next: <id> <title>, run /implement
 
 A task closed on `verify: manual` says so on this line, and the same line goes

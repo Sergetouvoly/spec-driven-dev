@@ -4,7 +4,7 @@ description: Regenerate and show where the project stands, for a fresh session
 
 # /status
 
-`docs/status.md` is derived, never edited by hand. This command rebuilds it from
+`docs/workflow/status.md` is derived, never edited by hand. This command rebuilds it from
 the filesystem and git, so it cannot drift. Any command that moves a task
 regenerates it by running this definition.
 
@@ -15,13 +15,13 @@ describes one branch, not the project.
 
 So off `main`, this command reads `main` and writes nothing:
 
-- list the tasks with `git ls-tree -r --name-only main docs/tasks/active/`,
+- list the tasks with `git ls-tree -r --name-only main docs/tasks/`,
   and
   read each one with `git show main:<path>`. Not `glob`, not the working tree:
   a feature branch may carry a task file that is not yet on `main`, or an
   edited copy of one that is, and either would make the status describe the
   branch.
-- do not overwrite `docs/status.md`. Print the generated status to the user and
+- do not overwrite `docs/workflow/status.md`. Print the generated status to the user and
   say it was built from `main` and not saved. Writing it here would commit a
   description of the project into a branch that holds one task, and the next
   merge would carry that snapshot onto `main` as if it were current.
@@ -33,7 +33,7 @@ On `main`, read the working tree and write the file as described below.
 On `main`, by `glob`. Off `main`, by `git ls-tree`/`git show` as in section 1 —
 same list, different source.
 
-- the tasks in `docs/tasks/active/*/`, one folder per spec slug plus `adhoc/`,
+- the tasks in `docs/tasks/*/`, one folder per spec slug plus `adhoc/`,
   and each frontmatter. A spec has an active task exactly when its folder
   holds a file
 - for each, does its branch exist (`git rev-parse --verify <branch>`), and how
@@ -64,7 +64,7 @@ Never read `docs/archive/`. Counts come from filenames, not content.
 
 ## 3. Write
 
-Overwrite `docs/status.md` with exactly this shape. Keep it under 20 lines: it
+Overwrite `docs/workflow/status.md` with exactly this shape. Keep it under 20 lines: it
 is read at the start of every session, so every line costs tokens forever.
 
 ```markdown

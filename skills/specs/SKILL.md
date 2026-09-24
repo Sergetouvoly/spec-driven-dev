@@ -134,9 +134,9 @@ If you find yourself writing a changelog inside the spec, that belongs in
 
 ## What outlives the feature
 
-Shared vocabulary goes to `docs/CONTEXT.md`.
+Shared vocabulary goes to `docs/reference/CONTEXT.md`.
 
-Expensive-to-reverse decisions such as storage, auth model, sync or async, or data ownership go to `docs/adr/<n>-<slug>.md`.
+Expensive-to-reverse decisions such as storage, auth model, sync or async, or data ownership go to `docs/reference/adr/<n>-<slug>.md`.
 
 Keep a one-line pointer in the spec instead of duplicating the content.
 

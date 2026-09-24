@@ -53,7 +53,7 @@ Two features split in parallel can never collide, and the task file names its
 own spec.
 
 Continue from the highest number carrying that slug. Glob the file names in
-`docs/tasks/active/<spec-slug>/` and `docs/archive/tasks/<spec-slug>/`, never
+`docs/tasks/<spec-slug>/` and `docs/archive/tasks/<spec-slug>/`, never
 their content: the archive is not read, it is listed. Other folders are
 ignored. Numbers are never reused, so a spec split a second time continues
 where it stopped.
@@ -64,10 +64,10 @@ Ad-hoc tasks use the slug `adhoc`, and the folder of the same name.
 
 Tasks are filed by the spec that defines them: one folder per spec, named after
 its slug, and one file per task inside it, at
-`docs/tasks/active/<spec-slug>/<id>-<short-name>.md`. The folder is the spec's
+`docs/tasks/<spec-slug>/<id>-<short-name>.md`. The folder is the spec's
 file name without `.md`, so `docs/specs/learner-suspension.md` owns
-`docs/tasks/active/learner-suspension/`. Ad-hoc tasks go in
-`docs/tasks/active/adhoc/`.
+`docs/tasks/learner-suspension/`. Ad-hoc tasks go in
+`docs/tasks/adhoc/`.
 
 The folder answers "what is left of this feature" with a `glob`, and it is why
 the slug is permanent: renaming a spec would orphan its folder along with its
@@ -96,7 +96,7 @@ One sentence. What works once this task is done.
 ## Notes
 Dependencies on other tasks, or anything the implementer must not assume.
 Constraints: <each rule from the spec that binds these covers, verbatim>
-Decisions: <docs/adr/<file>.md — one line on what it settles for this task>
+Decisions: <docs/reference/adr/<file>.md — one line on what it settles for this task>
 ```
 
 Copy the criteria word for word. Do not reword them: the spec is the contract.
@@ -150,12 +150,12 @@ to merge, which is the one moment nobody should be trusted with it.
 
 ## 5. Report and stop
 
-Tasks: <count> in docs/tasks/active/<spec-slug>/
+Tasks: <count> in docs/tasks/<spec-slug>/
 Coverage: <n>/<n> unticked criteria <, <m> already delivered>
 Manual criteria: <count>
 Next: review them, then run /implement
 
-Then regenerate `docs/status.md` as defined in `/status` and commit both on
+Then regenerate `docs/workflow/status.md` as defined in `/status` and commit both on
 `main` with the message `tasks: <spec-slug>`.
 
 The commit comes before your review, not after, and the report says so: the
