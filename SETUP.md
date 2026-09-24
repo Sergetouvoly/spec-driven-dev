@@ -231,10 +231,10 @@ that does not exist is the most convincing kind of decorative permission.
 ### 4.5 Create the project structure
 
 ```bash
-mkdir -p <docs>/specs <docs>/tasks/active <docs>/archive/tasks <docs>/adr
+mkdir -p <docs>/specs <docs>/tasks/active <docs>/archive/tasks <docs>/reference/adr <docs>/workflow
 ```
 
-Write a starter `<docs>/CONTEXT.md` holding only what you learned in phase 1:
+Write a starter `<docs>/reference/CONTEXT.md` holding only what you learned in phase 1:
 stack, entry points, test command, naming conventions actually observed in the
 code. Three to fifteen lines. Do not pad it, and do not guess.
 
@@ -242,7 +242,7 @@ End it with a `## Layout` section: one line per top-level folder, what it is
 for. The agent's `glob` finds the structure whenever it needs it; this section
 carries the meaning, which no listing can produce. Keep it to one line each.
 
-Generate `<docs>/status.md` by running the `/status` definition.
+Generate `<docs>/workflow/status.md` by running the `/status` definition.
 
 ### 4.6 Project rules
 
@@ -256,7 +256,7 @@ Add to the project rules file, appending rather than replacing:
 ```markdown
 ## Workflow
 
-Features go through /spec then /task before implementation. See docs/status.md
+Features go through /spec then /task before implementation. See docs/workflow/status.md
 for the current state.
 
 Specs in docs/specs/ are durable and are never archived: a delivered feature
@@ -265,6 +265,9 @@ Ticked acceptance criteria name the task that delivered them.
 
 Never read docs/archive/: it holds finished tasks, a human trail rather than
 context.
+
+Every other document is filed by purpose: docs/reference/ for what you read
+(CONTEXT.md, adr/), docs/workflow/ for what the commands generate (status.md).
 ```
 
 ---

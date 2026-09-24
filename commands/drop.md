@@ -52,7 +52,7 @@ out of `CHANGELOG.md` until someone decides.
 
 ## 4. Refresh and report
 
-Regenerate `docs/status.md` as defined in `/status`. Commit on `main` with the
+Regenerate `docs/workflow/status.md` as defined in `/status`. Commit on `main` with the
 message `drop: <id>`.
 
 Dropped <id>: <reason>

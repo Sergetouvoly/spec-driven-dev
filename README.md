@@ -72,18 +72,24 @@ so the spec is read once per feature instead of once per task.
 
 ```
 docs/
-├── CONTEXT.md             vocabulary and layout
-├── status.md              generated, never edited by hand
-├── adr/                   expensive decisions
-├── specs/                 contracts, never archived
+├── specs/                 contracts, all in one folder, never archived
 ├── tasks/active/<spec>/   open work, one folder per spec
-└── archive/tasks/<spec>/  finished work, never read by an agent
+├── archive/tasks/<spec>/  finished work, one folder per spec, never read by an agent
+├── reference/
+│   ├── CONTEXT.md         vocabulary and layout
+│   └── adr/               expensive decisions
+└── workflow/
+    └── status.md          generated, never edited by hand
 CHANGELOG.md               one line per delivered feature
 ```
 
 Plus the commands, skills and agents in `.claude/`, `.opencode/` or `.kilo/`, a
 Workflow block in `CLAUDE.md` / `AGENTS.md`, and `.specloop/` (your answers and
 the baseline for updates).
+
+Projects installed with an earlier version keep `CONTEXT.md`, `adr/` and
+`status.md` at the docs root; `update` moves them with `git mv`, and leaves both
+in place if the new location already holds something.
 
 ## Agent support
 

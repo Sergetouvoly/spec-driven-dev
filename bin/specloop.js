@@ -100,7 +100,7 @@ function summarize(p, answers) {
   for (const [dir, n] of Object.entries(byDir)) lines.push(`  create  ${dir}/  (${n} file${n > 1 ? 's' : ''})`);
   for (const r of p.rules) lines.push(`  ${r.exists ? 'append' : 'create'}  ${r.path}  (a delimited Workflow block)`);
   if (p.settings) lines.push(`  ${p.settings.exists ? 'update' : 'create'}  ${p.settings.path}  (two hooks that run the guard; the rest of the file untouched)`);
-  lines.push(`  create  ${answers.docs}/specs, tasks/active, archive/tasks, adr, and CONTEXT.md, status.md if missing`);
+  lines.push(`  create  ${answers.docs}/specs, tasks/active, archive/tasks, reference/adr, workflow, and reference/CONTEXT.md, workflow/status.md if missing`);
   lines.push('  create  .specloop/  (your answers, and the generated files as a baseline for updates)');
   for (const c of p.conflicts) lines.push(`  EXISTS  ${c}  (differs; kept unless you overwrite)`);
   return lines.join('\n');
@@ -175,7 +175,7 @@ async function init(opts) {
     `Checks: ${answers.checks.join(', ')}`,
     ...probeReport(result.probes),
     '',
-    `Next: fill in ${answers.docs}/CONTEXT.md, commit everything including .specloop/, then run /spec on your next feature.`,
+    `Next: fill in ${answers.docs}/reference/CONTEXT.md, commit everything including .specloop/, then run /spec on your next feature.`,
   ];
   console.log(out.join('\n'));
 }
@@ -197,6 +197,8 @@ function update(opts) {
   const section = (label, items) => (items.length ? [`${label}:`, ...items.map((i) => `  ${i}`)] : []);
   const out = [
     `Updated specloop ${state.version} -> ${version}`,
+    ...section('Moved to the new docs layout', r.moved),
+    ...section('NOT moved, both places hold something (merge them by hand)', r.blocked),
     ...section('Updated', r.updated),
     ...section('Merged with your edits', r.merged),
     ...section('CONFLICTS to resolve (look for <<<<<<< markers)', r.conflicted),

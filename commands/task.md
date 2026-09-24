@@ -96,7 +96,7 @@ One sentence. What works once this task is done.
 ## Notes
 Dependencies on other tasks, or anything the implementer must not assume.
 Constraints: <each rule from the spec that binds these covers, verbatim>
-Decisions: <docs/adr/<file>.md — one line on what it settles for this task>
+Decisions: <docs/reference/adr/<file>.md — one line on what it settles for this task>
 ```
 
 Copy the criteria word for word. Do not reword them: the spec is the contract.
@@ -155,7 +155,7 @@ Coverage: <n>/<n> unticked criteria <, <m> already delivered>
 Manual criteria: <count>
 Next: review them, then run /implement
 
-Then regenerate `docs/status.md` as defined in `/status` and commit both on
+Then regenerate `docs/workflow/status.md` as defined in `/status` and commit both on
 `main` with the message `tasks: <spec-slug>`.
 
 The commit comes before your review, not after, and the report says so: the

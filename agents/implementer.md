@@ -13,12 +13,12 @@ permission:
   edit:
     "*": allow
     "docs/specs/**": deny
-    "docs/adr/**": deny
+    "docs/reference/adr/**": deny
     "docs/archive/**": deny
   write:
     "*": allow
     "docs/specs/**": deny
-    "docs/adr/**": deny
+    "docs/reference/adr/**": deny
     "docs/archive/**": deny
   bash:
     "*": allow

@@ -4,7 +4,7 @@ description: Regenerate and show where the project stands, for a fresh session
 
 # /status
 
-`docs/status.md` is derived, never edited by hand. This command rebuilds it from
+`docs/workflow/status.md` is derived, never edited by hand. This command rebuilds it from
 the filesystem and git, so it cannot drift. Any command that moves a task
 regenerates it by running this definition.
 
@@ -21,7 +21,7 @@ So off `main`, this command reads `main` and writes nothing:
   a feature branch may carry a task file that is not yet on `main`, or an
   edited copy of one that is, and either would make the status describe the
   branch.
-- do not overwrite `docs/status.md`. Print the generated status to the user and
+- do not overwrite `docs/workflow/status.md`. Print the generated status to the user and
   say it was built from `main` and not saved. Writing it here would commit a
   description of the project into a branch that holds one task, and the next
   merge would carry that snapshot onto `main` as if it were current.
@@ -64,7 +64,7 @@ Never read `docs/archive/`. Counts come from filenames, not content.
 
 ## 3. Write
 
-Overwrite `docs/status.md` with exactly this shape. Keep it under 20 lines: it
+Overwrite `docs/workflow/status.md` with exactly this shape. Keep it under 20 lines: it
 is read at the start of every session, so every line costs tokens forever.
 
 ```markdown

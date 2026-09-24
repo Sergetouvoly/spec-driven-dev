@@ -21,7 +21,7 @@ folder.
 
 Follow the `clean-tree` skill, then continue.
 
-Read the task file, `docs/CONTEXT.md`, and any ADR named in the task's
+Read the task file, `docs/reference/CONTEXT.md`, and any ADR named in the task's
 `## Notes`. Nothing else, and never the spec: `/task` already copied into the
 task everything the spec had to say about it, and `docs/specs/` is denied to
 you in read. A task you cannot plan against is a defect in the task. Name the

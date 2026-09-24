@@ -207,7 +207,7 @@ back.
 
 ## B3. Refresh and report
 
-Regenerate `docs/status.md` as defined in `/status`. Commit the archive move, the
+Regenerate `docs/workflow/status.md` as defined in `/status`. Commit the archive move, the
 spec edits from B1, the changelog entry if there is one, and the status together
 on `main` with the message `done: <id>`.
 
