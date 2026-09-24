@@ -73,7 +73,7 @@ so the spec is read once per feature instead of once per task.
 ```
 docs/
 ├── specs/                 contracts, all in one folder, never archived
-├── tasks/active/<spec>/   open work, one folder per spec
+├── tasks/<spec>/          open work, one folder per spec
 ├── archive/tasks/<spec>/  finished work, one folder per spec, never read by an agent
 ├── reference/
 │   ├── CONTEXT.md         vocabulary and layout
@@ -88,8 +88,9 @@ Workflow block in `CLAUDE.md` / `AGENTS.md`, and `.specloop/` (your answers and
 the baseline for updates).
 
 Projects installed with an earlier version keep `CONTEXT.md`, `adr/` and
-`status.md` at the docs root; `update` moves them with `git mv`, and leaves both
-in place if the new location already holds something.
+`status.md` at the docs root and open tasks in `tasks/active/`; `update` moves
+them with `git mv`, and leaves both in place if the new location already holds
+something.
 
 ## Agent support
 

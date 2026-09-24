@@ -7,13 +7,13 @@ agent: implementer
 
 Task to implement: $ARGUMENTS
 
-Tasks are filed by spec, in `docs/tasks/active/<spec-slug>/`, and numbers are
+Tasks are filed by spec, in `docs/tasks/<spec-slug>/`, and numbers are
 scoped to their spec, so "lowest-numbered" only means something inside one
 folder.
 
 - A task id: take that task, from the folder its slug names.
-- A spec slug: take the lowest-numbered file in `docs/tasks/active/<spec-slug>/`.
-- Empty: if only one folder under `docs/tasks/active/` holds tasks, take its
+- A spec slug: take the lowest-numbered file in `docs/tasks/<spec-slug>/`.
+- Empty: if only one folder under `docs/tasks/` holds tasks, take its
   lowest-numbered file. If several do, list each folder with its lowest-numbered
   task and ask. Two features in flight is a priority call, and it is the user's.
 

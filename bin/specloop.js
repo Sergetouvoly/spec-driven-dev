@@ -100,7 +100,7 @@ function summarize(p, answers) {
   for (const [dir, n] of Object.entries(byDir)) lines.push(`  create  ${dir}/  (${n} file${n > 1 ? 's' : ''})`);
   for (const r of p.rules) lines.push(`  ${r.exists ? 'append' : 'create'}  ${r.path}  (a delimited Workflow block)`);
   if (p.settings) lines.push(`  ${p.settings.exists ? 'update' : 'create'}  ${p.settings.path}  (two hooks that run the guard; the rest of the file untouched)`);
-  lines.push(`  create  ${answers.docs}/specs, tasks/active, archive/tasks, reference/adr, workflow, and reference/CONTEXT.md, workflow/status.md if missing`);
+  lines.push(`  create  ${answers.docs}/specs, tasks, archive/tasks, reference/adr, workflow, and reference/CONTEXT.md, workflow/status.md if missing`);
   lines.push('  create  .specloop/  (your answers, and the generated files as a baseline for updates)');
   for (const c of p.conflicts) lines.push(`  EXISTS  ${c}  (differs; kept unless you overwrite)`);
   return lines.join('\n');

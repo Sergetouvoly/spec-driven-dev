@@ -15,7 +15,7 @@ describes one branch, not the project.
 
 So off `main`, this command reads `main` and writes nothing:
 
-- list the tasks with `git ls-tree -r --name-only main docs/tasks/active/`,
+- list the tasks with `git ls-tree -r --name-only main docs/tasks/`,
   and
   read each one with `git show main:<path>`. Not `glob`, not the working tree:
   a feature branch may carry a task file that is not yet on `main`, or an
@@ -33,7 +33,7 @@ On `main`, read the working tree and write the file as described below.
 On `main`, by `glob`. Off `main`, by `git ls-tree`/`git show` as in section 1 —
 same list, different source.
 
-- the tasks in `docs/tasks/active/*/`, one folder per spec slug plus `adhoc/`,
+- the tasks in `docs/tasks/*/`, one folder per spec slug plus `adhoc/`,
   and each frontmatter. A spec has an active task exactly when its folder
   holds a file
 - for each, does its branch exist (`git rev-parse --verify <branch>`), and how

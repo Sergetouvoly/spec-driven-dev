@@ -241,7 +241,7 @@ test('init: specs and tasks at the docs root, the rest under reference/ and work
   const dir = gitRepo();
   const answers = { ...DEFAULTS, targets: ['claude'] };
   install.apply(dir, answers, install.plan(dir, answers), { overwrite: false, version: '0.0.1', date: '2026-01-01', facts: { stack: [] } });
-  for (const rel of ['docs/specs', 'docs/tasks/active', 'docs/archive/tasks', 'docs/reference/adr', 'docs/reference/CONTEXT.md', 'docs/workflow/status.md']) {
+  for (const rel of ['docs/specs', 'docs/tasks', 'docs/archive/tasks', 'docs/reference/adr', 'docs/reference/CONTEXT.md', 'docs/workflow/status.md']) {
     assert.ok(fs.existsSync(path.join(dir, rel)), rel);
   }
   for (const rel of ['docs/CONTEXT.md', 'docs/status.md', 'docs/adr']) assert.ok(!fs.existsSync(path.join(dir, rel)), rel);
@@ -258,11 +258,19 @@ test('update: the earlier docs layout is moved with git mv, never over something
   fs.writeFileSync(path.join(dir, 'docs/adr/0001-storage.md'), '# Storage\n');
   fs.rmSync(path.join(dir, 'docs/reference/adr'), { recursive: true });
   fs.writeFileSync(path.join(dir, 'docs/status.md'), '# Old status\n');
+  fs.mkdirSync(path.join(dir, 'docs/tasks/active/auth'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'docs/tasks/active/auth/auth-001-login.md'), '# auth-001\n');
   execFileSync('git', ['add', 'docs'], { cwd: dir });
   execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', 'old layout'], { cwd: dir });
 
   const report = install.update(dir, install.loadState(dir), '0.0.2');
-  assert.deepEqual(report.moved, ['docs/CONTEXT.md -> docs/reference/CONTEXT.md', 'docs/adr -> docs/reference/adr']);
+  assert.deepEqual(report.moved, [
+    'docs/CONTEXT.md -> docs/reference/CONTEXT.md',
+    'docs/adr -> docs/reference/adr',
+    'docs/tasks/active/auth -> docs/tasks/auth',
+  ]);
+  assert.ok(fs.existsSync(path.join(dir, 'docs/tasks/auth/auth-001-login.md')));
+  assert.ok(!fs.existsSync(path.join(dir, 'docs/tasks/active')));
   assert.deepEqual(report.blocked, ['docs/status.md (docs/workflow/status.md already exists)']);
   assert.ok(fs.existsSync(path.join(dir, 'docs/reference/adr/0001-storage.md')));
   assert.equal(fs.readFileSync(path.join(dir, 'docs/status.md'), 'utf8'), '# Old status\n');
