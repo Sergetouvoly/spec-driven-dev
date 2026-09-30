@@ -87,8 +87,9 @@ padding.
 ## When the user asks directly
 
 "Update the changelog" outside `/done` means: list the specs whose criteria are
-all ticked, drop the ones whose slug is already in the file, and write the
-missing ones. Show the lines and ask before writing more than three — a changelog
+all ticked — `grep -l '^status: done'` finds the candidates, and the ticks
+confirm each one, since they win when the two disagree — drop the ones whose
+slug is already in the file, and write the missing ones. Show the lines and ask before writing more than three — a changelog
 that grew by nine bullets in one go is one nobody reads.
 
 Never invent an entry for work in progress. A feature with one unticked criterion

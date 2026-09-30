@@ -53,6 +53,11 @@ Cursor, Copilot or another agent: ask it to follow
 - **Specs are durable, tasks are disposable.** A spec is never archived: `/done`
   ticks the criterion a task proved and writes the task id next to it. The
   unticked ones are exactly what is left to build. No index file to maintain.
+- **A spec says where it stands.** Its frontmatter carries `status: draft`,
+  `active` or `done`, kept in step by the commands, so
+  `grep -L '^status: done' docs/specs/*.md` lists what is not finished without
+  opening a spec. The ticks stay the truth: `/status` corrects a status that
+  disagrees with them.
 - **Review runs in a separate context.** A read-only reviewer that never saw the
   reasoning behind the diff. Blocking means three things only: wrong behavior,
   a security hole, data loss.
@@ -72,7 +77,7 @@ so the spec is read once per feature instead of once per task.
 
 ```
 docs/
-├── specs/                 contracts, all in one folder, never archived
+├── specs/                 contracts, one folder, never archived, each with a status
 ├── tasks/<spec>/          open work, one folder per spec
 ├── archive/tasks/<spec>/  finished work, one folder per spec, never read by an agent
 ├── reference/
@@ -90,7 +95,8 @@ the baseline for updates).
 Projects installed with an earlier version keep `CONTEXT.md`, `adr/` and
 `status.md` at the docs root and open tasks in `tasks/active/`; `update` moves
 them with `git mv`, and leaves both in place if the new location already holds
-something.
+something. Specs written before the status existed get one, worked out from
+their ticks and their tasks folder.
 
 ## Agent support
 

@@ -50,6 +50,10 @@ Leave their acceptance criteria unticked, which is what they already are: only
 of `/task` if the answer to the question is yes, and it is what keeps the feature
 out of `CHANGELOG.md` until someone decides.
 
+Then recompute the spec's `status` by the table in the `specs` skill. If this
+was the last task in its folder, the spec goes back to `draft`: its criteria are
+pending and nothing is open to prove them.
+
 ## 4. Refresh and report
 
 Regenerate `docs/workflow/status.md` as defined in `/status`. Commit on `main` with the
@@ -58,4 +62,5 @@ message `drop: <id>`.
 Dropped <id>: <reason>
 Branch: <deleted, or kept with n commits>
 Uncovered behaviors: <B ids, or none>
+Spec status: <draft|active|done, or none for an ad-hoc task>
 Remaining: <count> in docs/tasks/<spec-slug>/, <count> in all
