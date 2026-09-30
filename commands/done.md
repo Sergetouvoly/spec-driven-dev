@@ -148,7 +148,7 @@ every other session reading a stale `docs/tasks/`.
 
 ## B1. Write the spec, archive the task
 
-You are on `main`. Three things happen here, in this order.
+You are on `main`. Four things happen here, in this order.
 
 **1. Tick what this task proved.** In the spec's `## Acceptance criteria`, tick
 each criterion this task's `covers` names, and put the id after it:
@@ -175,6 +175,11 @@ folder name it had under `docs/tasks/` (`adhoc/` for an ad-hoc task). If that wa
 the last file in `docs/tasks/<spec-slug>/`, remove the empty folder: git
 does not track it anyway, and an empty folder left on disk reads as a feature
 still in flight.
+
+**4. Recompute the spec's `status`** by the table in the `specs` skill: `done`
+when no pending criterion is left, `active` when its tasks folder still holds a
+task, `draft` otherwise — criteria left pending with nothing open to prove them,
+which `/task` has to split again. An ad-hoc task has no spec, and skips this.
 
 **The spec is never archived.** It stays in `docs/specs/` after every one of its
 tasks is finished, because a delivered feature is the one whose contract you will
@@ -215,7 +220,7 @@ Task <id>: done and merged
 Proof: verify exit 0 | confirmed by hand, no exit code
 Checks: <list, or none>
 Follow-up: <count>
-Spec: <n>/<n> criteria ticked <, feature delivered>
+Spec: <n>/<n> criteria ticked, status <draft|active|done>
 Remaining: <count> in docs/tasks/<spec-slug>/, <count> in all
 Next: <id> <title>, run /implement
 

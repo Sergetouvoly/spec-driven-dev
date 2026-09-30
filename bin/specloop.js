@@ -199,6 +199,7 @@ function update(opts) {
     `Updated specloop ${state.version} -> ${version}`,
     ...section('Moved to the new docs layout', r.moved),
     ...section('NOT moved, both places hold something (merge them by hand)', r.blocked),
+    ...section('Spec status added, from its criteria', r.statused),
     ...section('Updated', r.updated),
     ...section('Merged with your edits', r.merged),
     ...section('CONFLICTS to resolve (look for <<<<<<< markers)', r.conflicted),

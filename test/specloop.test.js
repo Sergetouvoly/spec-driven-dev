@@ -279,6 +279,38 @@ test('update: the earlier docs layout is moved with git mv, never over something
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test('spec status: pending criteria and the tasks folder decide, struck ones do not count', () => {
+  const spec = (criteria) => `# SPEC: x\n\n## Acceptance criteria\n${criteria}\n\n## Open questions and assumptions\n- [ ] not a criterion\n`;
+  assert.equal(project.specStatus(spec('- [ ] **B1.** a'), false), 'draft');
+  assert.equal(project.specStatus(spec('- [ ] **B1.** a'), true), 'active');
+  assert.equal(project.specStatus(spec('- [x] **B1.** a (x-001)\n- [ ] ~~**B2.**~~ withdrawn'), true), 'done');
+  assert.equal(project.specStatus('# SPEC: no criteria yet\n', false), 'draft');
+  assert.equal(project.withSpecStatus('# S\n', 'draft'), '---\nstatus: draft\n---\n\n# S\n');
+  assert.equal(project.withSpecStatus('---\nowner: a\nstatus: draft\n---\n# S\n', 'done'), '---\nowner: a\nstatus: done\n---\n# S\n');
+  assert.equal(project.withSpecStatus('---\nowner: a\n---\r\n# S\r\n', 'active'), '---\r\nowner: a\r\nstatus: active\r\n---\r\n# S\r\n');
+});
+
+test('update: specs without a status get one, a status already there is kept', () => {
+  const dir = gitRepo();
+  const answers = { ...DEFAULTS, targets: ['claude'] };
+  install.apply(dir, answers, install.plan(dir, answers), { overwrite: false, version: '0.0.1', date: '2026-01-01', facts: { stack: [] } });
+  const write = (rel, text) => {
+    fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
+    fs.writeFileSync(path.join(dir, rel), text);
+  };
+  write('docs/specs/auth.md', '# SPEC: auth\n\n## Acceptance criteria\n- [x] **B1.** a (auth-001)\n- [ ] **B2.** b\n');
+  write('docs/tasks/auth/auth-002-b.md', '# auth-002\n');
+  write('docs/specs/export.md', '# SPEC: export\n\n## Acceptance criteria\n- [x] **B1.** a (export-001)\n');
+  write('docs/specs/search.md', '# SPEC: search\n\n## Acceptance criteria\n- [ ] **B1.** a\n');
+  write('docs/specs/billing.md', '---\nstatus: active\n---\n\n# SPEC: billing\n\n## Acceptance criteria\n- [ ] **B1.** a\n');
+
+  const report = install.update(dir, install.loadState(dir), '0.0.2');
+  assert.deepEqual(report.statused, ['docs/specs/auth.md: active', 'docs/specs/export.md: done', 'docs/specs/search.md: draft']);
+  assert.match(fs.readFileSync(path.join(dir, 'docs/specs/export.md'), 'utf8'), /^---\nstatus: done\n---\n\n# SPEC: export\n/);
+  assert.match(fs.readFileSync(path.join(dir, 'docs/specs/billing.md'), 'utf8'), /^---\nstatus: active\n---\n/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 test('update: a clash between your edit and upstream is reported, not guessed', () => {
   const dir = gitRepo();
   const answers = { ...DEFAULTS, targets: ['opencode'] };

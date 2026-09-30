@@ -46,18 +46,29 @@ same list, different source.
   would ever mention it again
 - `git rev-parse --abbrev-ref HEAD` and `git status --porcelain`
 
-- the specs in `docs/specs/`, and for each, how many of its `## Acceptance
-  criteria` are ticked. A criterion struck through with `~~` is withdrawn: it
-  counts as neither ticked nor pending, and drops out of the total. Specs are never archived, so `docs/specs/` holds every
-  feature the product has ever promised, and the ticks are what separate the
-  delivered ones from the live work. Three states matter:
-  - no tick and no active task: never started. That is a backlog item nobody
-    decided on, and it goes under `Needs a decision`.
-  - some ticks and no active task: **stalled half-built**, which is the worst
-    state a feature can be in and the one nothing else would report. It goes
-    under `Needs a decision` with the count of criteria left.
-  - every criterion ticked: delivered. It contributes to the counters and is
-    named nowhere else, because a finished feature is not current state.
+- the specs in `docs/specs/`, and for each, its frontmatter `status` and how
+  many of its `## Acceptance criteria` are ticked. A criterion struck through
+  with `~~` is withdrawn: it counts as neither ticked nor pending, and drops out
+  of the total. Specs are never archived, so `docs/specs/` holds every feature
+  the product has ever promised, and the ticks are what separate the delivered
+  ones from the live work.
+
+  Recompute each status by the table in the `specs` skill and compare. The
+  ticks win: a spec whose `status` is missing or disagrees gets it rewritten, on
+  `main` only, and listed as `Status fixed` in what you print. Off `main`, list
+  it and write nothing. A wrong status is a stale cache, not a decision, and it
+  is what the next `grep` would believe.
+
+  Then, by the recomputed status:
+  - `draft` with no tick: never started. That is a backlog item nobody decided
+    on, and it goes under `Needs a decision`.
+  - `draft` with some ticks: **stalled half-built**, which is the worst state a
+    feature can be in and the one nothing else would report. It goes under
+    `Needs a decision` with the count of criteria left.
+  - `active`: in flight. Its tasks already appear under `In progress` or
+    `Next up`.
+  - `done`: delivered. It contributes to the counters and is named nowhere
+    else, because a finished feature is not current state.
 - the specs carrying an unresolved `[Question]`
 
 Never read `docs/archive/`. Counts come from filenames, not content.
@@ -98,4 +109,8 @@ archived tasks: git holds that history.
 
 ## 4. Show
 
-Print the file. Nothing else.
+Print the file, then one `Status fixed: <path> <old> -> <new>` line per spec
+whose status you rewrote. Nothing else.
+
+The fixes are not committed here, like `status.md` itself: the next command
+that commits on `main` carries them.

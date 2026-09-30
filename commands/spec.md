@@ -33,13 +33,15 @@ product promises.
 Read it, run the interview on what is changing only, and edit it in place under
 the rules in the `specs` skill: numbers stay, ticked criteria keep their tick and
 their task id, a changed behavior is unticked so `/task` picks it up again, a
-withdrawn one is struck rather than deleted. Report which behaviors you added,
-changed or withdrew.
+withdrawn one is struck rather than deleted. Then recompute its `status` by the
+table in the `specs` skill: a `done` spec that gained or unticked a criterion goes
+back to `draft`, or `active` if its tasks folder still holds a task. Report which
+behaviors you added, changed or withdrew.
 
 **If none exists**, save to `docs/specs/<short-name>.md`. Lowercase, single
 hyphens, for example `learner-suspension.md`. The slug is permanent: task ids
 embed it (`learner-suspension-001`), so renaming the file orphans every task that
-ever referred to it.
+ever referred to it. It starts with `status: draft` in its frontmatter.
 
 There is no fallback location. The docs root is decided once, at setup, and
 substituted into every command, skill and agent permission. A spec written
@@ -50,7 +52,7 @@ never find.
 
 Print three lines and nothing else:
 
-Spec: <path> <new, or evolved>
+Spec: <path> <new, or evolved>, status <draft|active|done>
 Behaviors: <count> | Uncovered: <count> | Open questions: <count>
 Next: review it, then run /task
 

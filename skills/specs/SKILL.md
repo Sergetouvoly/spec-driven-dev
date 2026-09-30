@@ -34,6 +34,10 @@ For full gear only.
 ## Template
 
 ```markdown
+---
+status: draft
+---
+
 # SPEC: <Feature name>
 
 ## Objective
@@ -78,6 +82,32 @@ The checkboxes under `## Acceptance criteria` are not decoration and you do not
 tick them. `/done` ticks each one when a task proves it, and writes the task id
 next to it. That is what makes a spec navigable to its tasks, so leave them
 unticked and leave the numbers alone.
+
+## Status
+
+The frontmatter `status` says where the spec stands, so a `grep` answers "what
+is not finished" without opening a single spec:
+
+```bash
+grep -L '^status: done' docs/specs/*.md
+```
+
+| Status | Means |
+| --- | --- |
+| `draft` | at least one pending criterion, and no open task in `docs/tasks/<spec-slug>/` |
+| `active` | at least one pending criterion, and its tasks folder holds a task |
+| `done` | no pending criterion: every one is ticked or struck through |
+
+A pending criterion is an unticked box that is not struck with `~~`.
+
+The status is a summary of the criteria and the tasks folder, never a decision
+of its own. The ticks are the truth: when the two disagree, the status is wrong,
+and `/status` rewrites it. Every command that ticks a criterion or moves a task
+recomputes it by the table above, so nobody ever sets it by hand.
+
+A spec you write starts at `draft`. A spec you evolve gets its status recomputed
+once you have edited it: a new or unticked criterion takes a `done` spec back to
+`draft`, or to `active` if tasks are still open.
 
 Add optional sections only when useful: `User flow`, `Data model`, `API contract`, `Security`, `Performance`, `Dependencies`.
 
@@ -149,6 +179,7 @@ Keep a one-line pointer in the spec instead of duplicating the content.
 - [ ] Acceptance criteria are testable.
 - [ ] No business rule was invented.
 - [ ] Durable knowledge is stored elsewhere.
+- [ ] `status` matches the criteria and the tasks folder.
 
 ## Delivery
 

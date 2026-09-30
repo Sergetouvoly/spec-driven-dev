@@ -263,6 +263,13 @@ Specs in docs/specs/ are durable and are never archived: a delivered feature
 still has a contract, and /spec edits it in place rather than starting a new one.
 Ticked acceptance criteria name the task that delivered them.
 
+Each spec carries `status: draft | active | done` in its frontmatter, kept in
+step with its criteria by the commands. `grep -L '^status: done' docs/specs/*.md`
+lists what is not finished; the ticks win when the two disagree.
+
+Tasks live in docs/tasks/<spec-slug>/, one folder per spec, ad-hoc ones
+in adhoc/.
+
 Never read docs/archive/: it holds finished tasks, a human trail rather than
 context.
 

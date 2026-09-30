@@ -148,6 +148,9 @@ with the change still unwritten, by whoever is scoping it. Taken at `/done`
 time it would be taken by the session that just wrote the code, under pressure
 to merge, which is the one moment nobody should be trusted with it.
 
+Then set the spec's frontmatter to `status: active`: its folder now holds a task.
+An `--adhoc` task has no spec, and nothing to set.
+
 ## 5. Report and stop
 
 Tasks: <count> in docs/tasks/<spec-slug>/
@@ -155,8 +158,8 @@ Coverage: <n>/<n> unticked criteria <, <m> already delivered>
 Manual criteria: <count>
 Next: review them, then run /implement
 
-Then regenerate `docs/workflow/status.md` as defined in `/status` and commit both on
-`main` with the message `tasks: <spec-slug>`.
+Then regenerate `docs/workflow/status.md` as defined in `/status` and commit it, the
+tasks and the spec's status on `main` with the message `tasks: <spec-slug>`.
 
 The commit comes before your review, not after, and the report says so: the
 tasks are on `main` so that any session can see them, which is the workflow's
