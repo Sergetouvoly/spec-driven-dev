@@ -5,13 +5,10 @@ description: Interview the user, then write a short, implementation-ready specif
 
 # Specs
 
-Turn a request into a short, testable contract.
+Turn a request into a short, testable contract: **what the system must do and
+why**, never **how**.
 
-A spec defines **what the system must do and why**, never **how to build it**.
-
-## Pick a gear
-
-Match the effort to the risk.
+## Gear
 
 | Situation | Action |
 | --- | --- |
@@ -19,17 +16,14 @@ Match the effort to the risk.
 | Clear request, one area, low regression risk | Short spec, 15 to 25 lines. One confirmation round. |
 | Vague, cross-cutting, or costly to reverse | Full interview, then a one-page spec. |
 
-## Interview
+## Interview (full gear only)
 
-For full gear only.
-
-- **Read before asking.** Inspect only the context needed to answer pending decisions.
-- **Bring your own answer.** Every question includes a recommended answer and a one-line reason.
-- **One branch at a time.** Resolve decisions in dependency order.
-- **Skip questions that do not change the outcome.**
-- **Do not invent business rules.** Ask the user or mark `[Assumption]`.
-- **Split oversized work.** If decisions keep multiplying, spec the first coherent piece.
-- Stop when no important decision remains open.
+- Read only the context needed for pending decisions.
+- Every question carries a recommended answer and a one-line reason.
+- Resolve decisions in dependency order; skip those that do not change the outcome.
+- Never invent business rules: ask, or mark `[Assumption]`.
+- Oversized: spec the first coherent piece.
+- Stop when no important decision is open.
 
 ## Template
 
@@ -61,8 +55,8 @@ Business rules, permissions, invariants, audit requirements, and technical
 constraints that affect behavior.
 
 ## Decisions
-Each decision taken during the interview, and why, one line each. Only the ones
-that close an alternative someone could reasonably reopen.
+Decisions taken in the interview, one line each, only those that close an
+alternative someone could reopen.
 - <what was decided> — <why, and what it rules out>
 
 ## Acceptance criteria
@@ -73,118 +67,89 @@ that close an alternative someone could reasonably reopen.
 - [Assumption] ...
 ```
 
-`## Decisions` is where a resolved question goes. Without it the answer the user
-gave you survives only as the shape of a behavior, and the next person to read
-the spec reopens the debate you already closed. A `[Question]` that gets answered
-moves here with its answer; it does not simply disappear.
+An answered `[Question]` moves to `## Decisions` with its answer.
 
-The checkboxes under `## Acceptance criteria` are not decoration and you do not
-tick them. `/done` ticks each one when a task proves it, and writes the task id
-next to it. That is what makes a spec navigable to its tasks, so leave them
-unticked and leave the numbers alone.
+Never tick `## Acceptance criteria`: `/done` ticks each when a task proves it
+and writes the task id next to it. Leave them unticked and the numbers alone.
 
 ## Status
 
-The frontmatter `status` says where the spec stands, so a `grep` answers "what
-is not finished" without opening a single spec:
-
-```bash
-grep -L '^status: done' docs/specs/*.md
-```
+Frontmatter `status`, so `grep -L '^status: done' docs/specs/*.md` lists what
+is unfinished.
 
 | Status | Means |
 | --- | --- |
-| `draft` | at least one pending criterion, and no open task in `docs/tasks/<spec-slug>/` |
-| `active` | at least one pending criterion, and its tasks folder holds a task |
-| `done` | no pending criterion: every one is ticked or struck through |
+| `draft` | ≥1 pending criterion, no open task in `docs/tasks/<spec-slug>/` |
+| `active` | ≥1 pending criterion, its tasks folder holds a task |
+| `done` | no pending criterion: all ticked or struck through |
 
-A pending criterion is an unticked box that is not struck with `~~`.
+Pending = unticked and not struck with `~~`.
 
-The status is a summary of the criteria and the tasks folder, never a decision
-of its own. The ticks are the truth: when the two disagree, the status is wrong,
-and `/status` rewrites it. Every command that ticks a criterion or moves a task
-recomputes it by the table above, so nobody ever sets it by hand.
+Status is a summary, never a decision: ticks are the truth and `/status`
+rewrites a wrong one. Every command that ticks a criterion or moves a task
+recomputes it. A new spec starts at `draft`; an evolved one is recomputed after
+editing (a new or unticked criterion takes `done` back to `draft`, or `active`
+if tasks are open).
 
-A spec you write starts at `draft`. A spec you evolve gets its status recomputed
-once you have edited it: a new or unticked criterion takes a `done` spec back to
-`draft`, or to `active` if tasks are still open.
-
-Add optional sections only when useful: `User flow`, `Data model`, `API contract`, `Security`, `Performance`, `Dependencies`.
+Optional sections, only when useful: `User flow`, `Data model`, `API contract`,
+`Security`, `Performance`, `Dependencies`.
 
 ## Rules
 
-- No class names, pseudo-code, or internal architecture in `Expected behavior`.
-- Number every behavior. Each acceptance criterion cites its behavior number, and every behavior has one. The numbers are stable: they are what later tasks, tests and pull requests refer to.
-- One behavior states one thing. If it needs an "and", split it.
-- `Out of scope` must contain at least one real boundary.
-- Acceptance criteria must be verifiable without interpretation.
+- No class names, pseudo-code or architecture in `Expected behavior`.
+- Number every behavior; each acceptance criterion cites its number and every
+  behavior has one. Numbers are stable.
+- One behavior states one thing: an "and" means split.
+- `Out of scope` has at least one real boundary.
+- Criteria verifiable without interpretation.
 - Unresolved decisions go in `Open questions and assumptions`.
 - Small feature, small spec.
-- Do not duplicate durable project knowledge or architectural decisions. Reference `CONTEXT.md` or an ADR instead.
+- Do not duplicate durable knowledge: reference `CONTEXT.md` or an ADR.
 
 ## Evolving a spec
 
-A spec is not consumed by being implemented. It stays in `docs/specs/` for the
-life of the feature, and the second change to that feature edits it rather than
-starting a new document.
+A spec stays in `docs/specs/` for the life of the feature; later changes edit
+it, never a new document.
 
-When you come back to a spec that already has ticked criteria:
-
-- **Never renumber, never reuse.** `B1` means one thing forever: tasks, tests,
-  commit messages and archived work all point at it. A new behavior takes the
-  next free number, even if it belongs in the middle of the list conceptually.
-- **A ticked criterion is delivered.** Leave the tick and the task id. If the
-  behavior itself must change, edit the criterion in place, keep its number,
-  untick it, and say in `Open questions and assumptions` what changed and why —
-  that untick is what makes `/task` pick it up again.
-- **A removed behavior is struck, not deleted.** Strike it in **both** places —
-  the behavior under `## Expected behavior` and its criterion — and give the
-  criterion a reason:
+- **Never renumber or reuse.** A new behavior takes the next free number.
+- **Ticked = delivered.** Keep tick and task id. To change the behavior, edit
+  the criterion in place, keep its number, untick it, and say what changed and
+  why in `Open questions and assumptions` (the untick makes `/task` re-pick it).
+- **Removed = struck, not deleted**, in **both** the behavior and its criterion,
+  with a reason:
 
   ```markdown
   - [ ] ~~**B4.**~~ withdrawn 2026-09-19: admin tooling deferred, see lockout-003.
   ```
 
-  Deleting it instead would break every reference to the number and make the
-  archived task that carried it unexplainable.
+  A struck criterion is neither delivered nor pending: leave its box unticked;
+  `/task` does not split it, `/status` excludes it, `changelog` ignores it.
+- **No `spec-v2.md`.** One file per feature; git holds history.
 
-  **A struck criterion is neither delivered nor pending.** Leave its box
-  unticked — it was never proven — and understand that `~~` is what takes it out
-  of play: `/task` does not split it, `/status` leaves it out of the totals, and
-  `changelog` does not hold the feature back for it. Without the strike an
-  unticked box means "still to build", and the behavior would be re-split
-  forever.
-- **No `spec-v2.md`.** One file per feature, always the current contract. Git
-  holds every previous state, with the diff and the reason in the commit, which
-  is a better history than three files that each claim to be the truth.
-
-Keep any in-document history to the `Open questions and assumptions` lines above.
-If you find yourself writing a changelog inside the spec, that belongs in
-`CHANGELOG.md`.
+Keep in-document history to those `Open questions and assumptions` lines; a
+changelog belongs in `CHANGELOG.md`.
 
 ## What outlives the feature
 
-Shared vocabulary goes to `docs/reference/CONTEXT.md`.
+- Shared vocabulary → `docs/reference/CONTEXT.md`.
+- Expensive-to-reverse decisions (storage, auth model, sync/async, data
+  ownership) → `docs/reference/adr/<n>-<slug>.md`.
 
-Expensive-to-reverse decisions such as storage, auth model, sync or async, or data ownership go to `docs/reference/adr/<n>-<slug>.md`.
-
-Keep a one-line pointer in the spec instead of duplicating the content.
+Keep a one-line pointer in the spec.
 
 ## Final check
 
-- [ ] Another developer understands it without verbal explanation.
-- [ ] Scope is explicit.
-- [ ] The states and failure cases that matter are covered.
-- [ ] Every behavior is numbered and matched by an acceptance criterion.
-- [ ] Acceptance criteria are testable.
-- [ ] No business rule was invented.
-- [ ] Durable knowledge is stored elsewhere.
+- [ ] Understandable without verbal explanation.
+- [ ] Scope explicit.
+- [ ] Relevant states and failures covered.
+- [ ] Every behavior numbered and matched by a criterion.
+- [ ] Criteria testable.
+- [ ] No business rule invented.
+- [ ] Durable knowledge stored elsewhere.
 - [ ] `status` matches the criteria and the tasks folder.
 
 ## Delivery
 
-Save to `docs/specs/<short-name>.md`, and see `/spec` for the mechanics around it.
-
-A spec is a **checkpoint, not permission to code**.
-
-After creating it, stop for review unless the user explicitly requested end-to-end execution.
+Save to `docs/specs/<short-name>.md` (mechanics in `/spec`). A spec is a
+**checkpoint, not permission to code**: stop for review unless the user asked
+for end-to-end execution.

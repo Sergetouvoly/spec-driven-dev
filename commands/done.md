@@ -8,118 +8,70 @@ Task to close: $ARGUMENTS
 
 If empty, take the task whose `branch` matches the current git branch.
 
-On `main`, no branch matches, so take instead the task under
-`docs/tasks/*/` carrying `merged: true`: its code is in and only the archive is left. That is
-where a pull request drops you — you merged it on the host, pulled, and the
-branch is gone. If several tasks carry the marker, list them and ask. If none
-does, say so: there is nothing here to close, and the id was worth typing.
+On `main`, take instead the task under `docs/tasks/*/` with `merged: true`
+(code in, archive left; typical after a PR merged on the host). Several: list
+and ask. None: say there is nothing to close.
 
-This command runs in two phases. Phase A verifies and merges. Phase B writes the
-spec, archives the task and records what shipped.
-If `merged: true` in the frontmatter, the branch is already in, so skip to
-phase B.
+Phase A verifies and merges. Phase B writes the spec, archives, records. If
+`merged: true`, skip to phase B.
 
-## A1. Proof, not ticks
+## A1. Proof
 
-Run `verify` from the frontmatter. If it does not exit 0, print the failure and
-STOP. Ticked boxes prove nothing: an agent that just wrote the code believes it
-works, which is exactly why the gate is the test run and not the checklist.
+Run `verify` from the frontmatter. Non-zero exit: print the failure and STOP.
+Ticks prove nothing; the test run is the gate.
 
-For each criterion marked `manual`, show it to the user and ask for a yes or no.
-A no stops the command.
-
-If `verify: manual`, show every criterion and ask once.
+Show each `manual` criterion to the user for yes/no; a no stops. If
+`verify: manual`, show every criterion and ask once.
 
 ## A2. Checks
 
-Read `checks` in the frontmatter and run each on the diff of this task.
+Run each of the frontmatter `checks` on the task's diff.
 
-**The diff is `git diff main`, not `git diff main...HEAD`.** `/implement` never
-commits, so at this point the branch carries no commit above `main`, and the
-three-dot form would hand every check an empty diff — a reviewer that passes
-because it was shown nothing at all.
+**Diff = `git diff main`, not `git diff main...HEAD`** (`/implement` never
+commits, so three dots is empty). Run `git add -N .` first so new files show,
+and `git reset` after the checks, before A4 staging.
 
-Run `git add -N .` first. `git diff` ignores untracked files, and a source file
-the task created but never staged is exactly the kind a review has to see. Then
-`git reset` once the checks are done, before you stage anything in A4: an
-intent-to-add entry left in the index reaches that commit as an empty file.
+**Empty `checks`: skip this section, print `Checks: none`, go to A3.** Do not
+review anyway or offer to: that was decided at `/task` time.
 
-Run the checks in this order, stopping at the first that fails.
+Run in order, stop at the first failure:
+- `review`: delegate to the `reviewer` subagent via `task` (own context).
+- `e2e`: follow the `e2e-tests` skill on this task's criteria.
+- `pentest`: follow the `pentest` skill on the surface this task opened.
 
-**An empty `checks` skips this section entirely.** Do not review the diff
-anyway, and do not offer to. Someone decided at `/task` time that `verify`
-proves this change on its own, before the code existed and with nothing to
-defend. You are the session that just wrote it. Print `Checks: none` and go to
-A3.
+If a check's skill or agent is not installed, STOP and name it. Never
+improvise the check.
 
-- `review` delegate to the `reviewer` subagent via `task`. It runs read-only,
-  in its own context. An agent reviewing its own work in the same session
-  confirms its own assumptions, including the wrong ones.
-- `e2e` follow the `e2e-tests` skill against the criteria of this task.
-- `pentest` follow the `pentest` skill on the surface this task opened.
+**Blocking = incorrect behavior against a criterion, a security hole, or
+possible data loss.** Nothing else.
 
-If a check names a skill or an agent that is not installed, STOP and say which
-one. Do not improvise the check from its name: a `pentest` invented on the spot
-reports whatever the session happens to think of, and it will be read as if it
-had been thorough. Either the skill gets installed, or the check comes out of
-the task's `checks`.
+Fix blocking findings, then **rerun `verify` (A1) before rerunning the check**.
+**Max two passes**; if a third is needed, hand the rest to the user.
+Non-blocking findings go under `## Follow-up` in the task file, or an
+`--adhoc` task if they need their own branch.
 
-**Blocking means one of three things only: incorrect behavior against a
-criterion, a security hole, or possible data loss.** Everything else is not
-blocking, whatever tone the reviewer used.
+## A3. Spec drift
 
-Fix blocking findings, then **rerun `verify` from A1 before rerunning the
-check**. A fix written here is code nobody tested: the diff that satisfied the
-reviewer is not the diff `verify` approved twenty minutes ago, and a fix for a
-missing authorization is exactly the kind that breaks an existing test. Merging
-on the strength of the first `verify` run would mean the gate stopped applying
-the moment the code started changing again.
+No `spec`: skip.
 
-**Two passes maximum.** If a third
-would be needed, stop and hand the remainder to the user. Non-blocking findings
-go under `## Follow-up` in the task file, or become an `--adhoc` task if they
-need their own branch.
-
-## A3. Spec drift, noted here and written on `main`
-
-A task with no `spec` skips this section: there is no contract behind its
-criteria, and the task file is already the record.
-
-Otherwise, if implementation showed a criterion to be wrong, incomplete or
-ambiguous, append it to the task file:
+If implementation showed a criterion wrong, incomplete or ambiguous, append to
+the task file:
 
 ```markdown
 ## Spec drift
 <B id>. <what the spec claims> — <what the code showed> — <what the spec should say>
 ```
 
-**Do not edit the spec here.** You are on the branch, and the spec lives on
-`main`. An edit made here is staged by nothing — A4 stages the code and this
-task's file, nothing else under `docs/` — so it would ride the working tree
-across the switch and the merge, and on the pull request path it would be lost
-outright: only what you pushed goes in. Phase B applies it on `main`, where the
-spec actually lives, and the note reaches phase B because the task file is
-committed in A4.
-
-A spec left lying is worse than no spec: it is what you will read in six months,
-and it is now a document that stays in `docs/specs/` for good.
+**Do not edit the spec here**: it lives on `main`, and an edit here would be
+unstaged and lost on the PR path. Phase B applies it; the note travels in the
+task file committed in A4.
 
 ## A4. Commit and merge
 
-Stage the code **and this task's own file**, nothing else under `docs/`.
-
-`/implement` wrote `## Plan` into the task file, ticked the boxes it proved, and
-A2 may have added `## Follow-up`. None of that is committed yet: `/implement`
-does not commit, and this is the commit that owns it. Left out, it survives only
-as an uncommitted change riding the working tree across the switch and the
-merge — which happens to work for a direct merge and silently loses everything
-on a pull request, where only what you pushed goes in.
-
-This does not break the rule that task state lives on `main`. That rule is about
-the *archive move*, which changes what other sessions see and still happens on
-`main` in B1. The file stays in `docs/tasks/` here; what enters the branch is the
-record of the work the branch did, and it belongs in the same commit as the code
-it describes.
+Stage the code **and this task's own file**, nothing else under `docs/`. The
+file holds `## Plan`, ticks and `## Follow-up`, which `/implement` left
+uncommitted; leaving it out loses them on the PR path. The archive move still
+happens on `main` in B1.
 
 One commit:
 
@@ -133,88 +85,42 @@ Covers: <B ids>
 Then merge into `main`:
 
 - direct: `git switch main`, `git merge --no-ff <branch>`, delete the branch,
-  set `merged: true`, continue to phase B. The marker is committed in B3, on
-  `main`, together with the archive move.
-- pull request: set `merged: true` in the task file **before the commit above**,
-  so the marker is in the commit and in the push. Then push, open the PR, and
-  STOP with `PR open, merge it and run /done <id>`.
-
-  Setting it after the push would leave it as an uncommitted edit that the pull
-  request never carries: `main` would come back saying `merged: false`, and the
-  second run of `/done` would redo phase A against a branch already merged.
-
-Task state only becomes real on `main`. Archiving on a feature branch leaves
-every other session reading a stale `docs/tasks/`.
+  set `merged: true`, continue to phase B (committed in B3).
+- pull request: set `merged: true` in the task file **before the commit
+  above**, so it is in the push. Push, open the PR, STOP with
+  `PR open, merge it and run /done <id>`.
 
 ## B1. Write the spec, archive the task
 
-You are on `main`. Four things happen here, in this order.
+On `main`, in order:
 
-**1. Tick what this task proved.** In the spec's `## Acceptance criteria`, tick
-each criterion this task's `covers` names, and put the id after it:
+1. **Tick** in the spec's `## Acceptance criteria` each criterion in the
+   task's `covers` that `verify` proved or the user confirmed in A1, with the
+   task id after it:
+   `- [x] **B1.** Three failed attempts lock the account for 15 minutes. (auth-001)`
+   Only this command ticks, only at this moment.
+2. **Apply `## Spec drift`** if present: correct the criterion (it keeps its
+   number; numbers are never reused) and record the change in the spec's
+   `Open questions and assumptions`.
+3. **Move the task file** to `docs/archive/tasks/<spec-slug>/` (`adhoc/` for
+   ad-hoc). Remove the emptied `docs/tasks/<spec-slug>/` folder.
+4. **Recompute the spec's `status`** by the `specs` skill table. Ad-hoc: skip.
 
-```markdown
-- [ ] **B1.** Three failed attempts lock the account for 15 minutes.
-- [x] **B1.** Three failed attempts lock the account for 15 minutes. (auth-001)
-```
+**The spec is never archived**: it stays in `docs/specs/`. Agents never read
+`docs/archive/`.
 
-Tick only what `verify` proved or the user confirmed in A1. This is the whole of
-the spec-to-task direction, and it is why no index file exists: open the spec and
-the criteria tell you which task delivered each behavior, while the unticked ones
-are exactly what is left to build. `/task` re-splits from that, and `/status`
-counts it. It is written by this command at the one moment it becomes true,
-never by hand.
+## B2. Changelog
 
-**2. Apply the `## Spec drift` note**, if A3 wrote one: correct the criterion and
-record the change in the spec's `Open questions and assumptions`. A corrected
-criterion keeps its number. Numbers are never reused and never reassigned:
-tasks, tests and commits refer to them.
-
-**3. Move the task file** to `docs/archive/tasks/<spec-slug>/`, the same
-folder name it had under `docs/tasks/` (`adhoc/` for an ad-hoc task). If that was
-the last file in `docs/tasks/<spec-slug>/`, remove the empty folder: git
-does not track it anyway, and an empty folder left on disk reads as a feature
-still in flight.
-
-**4. Recompute the spec's `status`** by the table in the `specs` skill: `done`
-when no pending criterion is left, `active` when its tasks folder still holds a
-task, `draft` otherwise — criteria left pending with nothing open to prove them,
-which `/task` has to split again. An ad-hoc task has no spec, and skips this.
-
-**The spec is never archived.** It stays in `docs/specs/` after every one of its
-tasks is finished, because a delivered feature is the one whose contract you will
-need most: to evolve it, to re-split what a `/drop` reopened, and for the
-reviewer to check the next task against it. Archiving it would file the contract
-in the one folder no agent may read, and the feature could never move again.
-Tasks are the work, and work finishes. The spec is the contract, and the contract
-holds as long as the feature is in the product.
-
-Nothing in `docs/archive/` is ever read again by an agent. It is a human trail of
-the work, not of the contract.
-
-## B2. Changelog, but only when the feature is finished
-
-If this task's spec now has **no unticked criterion left** — criteria struck
-through with `~~` being withdrawn rather than pending — the feature is delivered:
-follow the `changelog` skill for that spec, once. Otherwise skip this
-section and say nothing about it.
-
-A task is not a product change. Twelve tasks can land before a user sees
-anything, and a changelog with one line per task is the archive again, in a file
-humans were promised they could read. So the unit here is the feature, the
-wording comes from the spec's `## Objective` rather than from a commit subject,
-and the entry is written at the one moment the feature became true.
-
-An unticked criterion left by `/drop` keeps the feature out of the changelog on
-purpose: it carries a `[Question] still wanted?`, and a feature announced while
-one of its promises is still undecided is an announcement you will have to take
-back.
+If the spec now has **no unticked criterion** (`~~` struck ones are withdrawn,
+not pending), follow the `changelog` skill for it, once. Otherwise skip
+silently. An unticked criterion left by `/drop` (`[Question] still wanted?`)
+keeps the feature out of the changelog.
 
 ## B3. Refresh and report
 
-Regenerate `docs/workflow/status.md` as defined in `/status`. Commit the archive move, the
-spec edits from B1, the changelog entry if there is one, and the status together
-on `main` with the message `done: <id>`.
+Regenerate `docs/workflow/status.md` as defined in `/status`. Commit the
+archive move, spec edits, changelog entry and status together on `main` with
+`done: <id>`.
 
 Task <id>: done and merged
 Proof: verify exit 0 | confirmed by hand, no exit code
@@ -224,6 +130,5 @@ Spec: <n>/<n> criteria ticked, status <draft|active|done>
 Remaining: <count> in docs/tasks/<spec-slug>/, <count> in all
 Next: <id> <title>, run /implement
 
-A task closed on `verify: manual` says so on this line, and the same line goes
-into the task file before it is archived. Six months later the trail has to
-show which tasks were machine-proven and which were vouched for.
+A task closed on `verify: manual` says so on the Proof line, and the same line
+goes into the task file before archiving.

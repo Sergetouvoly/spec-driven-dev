@@ -7,10 +7,10 @@ agent: spec-writer
 
 Feature idea: $ARGUMENTS
 
-If that line is empty, ask for the idea before doing anything else.
+Empty: ask for the idea first.
 
-Follow the `specs` skill. It owns the gears, the interview, the template and the
-final check. This file owns only the mechanics around it.
+Follow the `specs` skill (gears, interview, template, final check). This file
+owns only the mechanics.
 
 ## 1. Clean tree
 
@@ -18,43 +18,32 @@ Follow the `clean-tree` skill, then continue.
 
 ## 2. Context
 
-Read `docs/reference/CONTEXT.md` and list `docs/reference/adr/` if they exist. Reference them from
-the spec with a one-line pointer, never copy their content.
+Read `docs/reference/CONTEXT.md` and list `docs/reference/adr/` if they exist;
+reference them with a one-line pointer, never copy. Never read `docs/archive/`.
 
-Never read `docs/archive/`.
+## 3. New spec, or next version
 
-## 3. New spec, or the next version of one
+List `docs/specs/` first (specs are never archived).
 
-List `docs/specs/` first. A spec for this feature may already exist, delivered or
-not: they are never archived, so what is on disk is the whole history of what the
-product promises.
+**Exists: evolve it.** No second file, no overwrite. Read it, interview only on
+what changes, edit in place per the `specs` skill: numbers stay, ticked
+criteria keep tick and task id, a changed behavior is unticked so `/task`
+re-picks it, a withdrawn one is struck. Recompute `status` by the `specs`
+table (a `done` spec that gained or unticked a criterion → `draft`, or
+`active` if its tasks folder holds a task). Report behaviors added, changed,
+withdrawn.
 
-**If one exists, evolve it.** Do not open a second file and do not overwrite it.
-Read it, run the interview on what is changing only, and edit it in place under
-the rules in the `specs` skill: numbers stay, ticked criteria keep their tick and
-their task id, a changed behavior is unticked so `/task` picks it up again, a
-withdrawn one is struck rather than deleted. Then recompute its `status` by the
-table in the `specs` skill: a `done` spec that gained or unticked a criterion goes
-back to `draft`, or `active` if its tasks folder still holds a task. Report which
-behaviors you added, changed or withdrew.
-
-**If none exists**, save to `docs/specs/<short-name>.md`. Lowercase, single
-hyphens, for example `learner-suspension.md`. The slug is permanent: task ids
-embed it (`learner-suspension-001`), so renaming the file orphans every task that
-ever referred to it. It starts with `status: draft` in its frontmatter.
-
-There is no fallback location. The docs root is decided once, at setup, and
-substituted into every command, skill and agent permission. A spec written
-outside it is one the spec writer has no permission to create and `/task` would
-never find.
+**None: create** `docs/specs/<short-name>.md` (lowercase, single hyphens, e.g.
+`learner-suspension.md`) with `status: draft`. The slug is permanent (task ids
+embed it). No other location is allowed.
 
 ## 4. Report and stop
 
-Print three lines and nothing else:
+Three lines only:
 
 Spec: <path> <new, or evolved>, status <draft|active|done>
 Behaviors: <count> | Uncovered: <count> | Open questions: <count>
 Next: review it, then run /task
 
-Do not paste the spec in chat unless asked. Do not code in this turn unless the
-user explicitly asked to go end to end.
+Do not paste the spec unless asked. Do not code unless the user explicitly
+asked to go end to end.

@@ -7,71 +7,43 @@ agent: spec-writer
 
 Input: $ARGUMENTS
 
-Two modes:
-
-- `--adhoc "<description>"` creates one task with no spec. Skip to section 4.
-- anything else is a spec path or name. If empty, list `docs/specs/` and ask.
+- `--adhoc "<description>"`: one task, no spec. Skip to section 4.
+- otherwise a spec path or name. Empty: list `docs/specs/` and ask.
 
 ## 1. Preconditions
 
 Follow the `clean-tree` skill, then continue.
 
-You must be on `main`. Tasks and specs live on `main` only, never on a feature
-branch: a task file archived on a branch is invisible to every other session
-until that branch merges. If the current branch is not `main`, STOP and say so.
+Must be on `main` (tasks and specs live there only). Otherwise STOP and say so.
 
-Read the spec. If it still has unresolved `[Question]` entries, list them and
-STOP. Splitting an undecided spec produces tasks that will be rewritten.
+Read the spec. Unresolved `[Question]` entries: list them and STOP.
 
 ## 2. Split
 
-One task is a coherent, shippable slice that an agent can finish without
-supervision. If a task cannot run unsupervised, it is too big: split it again.
+One task = a coherent, shippable slice an agent finishes unsupervised; if not,
+split again.
 
-Rules:
+- Split the **unticked** criteria only. Each appears in the `covers` of at
+  least one task. A `~~` struck criterion is withdrawn: skip it.
+- A **ticked** criterion is delivered: leave it out of every `covers` and keep
+  its tick.
+- No behavior in two tasks.
+- Order by dependency.
+- Aim for 2 to 6 tasks; more than 8 means split the spec.
 
-- **You split the unticked criteria, and only those.** Every unticked criterion
-  under the spec's `## Acceptance criteria` appears in the `covers` of at least
-  one task. A criterion struck through with `~~` is withdrawn, not pending:
-  skip it, whatever its box says.
-- **A ticked criterion is already delivered**, and carries the id of the task
-  that delivered it. Leave it out of every `covers`, and leave the tick alone.
-  This is how a spec is split a second time without rebuilding what already
-  works: the spec itself records what is done, so nothing has to be read out of
-  the archive to find out.
-- No behavior appears in two tasks.
-- Tasks are ordered by dependency: a task never needs a later one to be done.
-- Aim for 2 to 6 tasks. More than 8 means the spec itself should be split.
-
-If every criterion is already ticked, there is nothing to split: say so and STOP.
-The feature is delivered, and a change to it starts at `/spec`.
+All criteria ticked: say so and STOP (a change starts at `/spec`).
 
 ## 3. Numbering
 
-Numbers are scoped to the spec, not global: `<spec-slug>-001`, `<spec-slug>-002`.
-Two features split in parallel can never collide, and the task file names its
-own spec.
-
-Continue from the highest number carrying that slug. Glob the file names in
-`docs/tasks/<spec-slug>/` and `docs/archive/tasks/<spec-slug>/`, never
-their content: the archive is not read, it is listed. Other folders are
-ignored. Numbers are never reused, so a spec split a second time continues
-where it stopped.
-
-Ad-hoc tasks use the slug `adhoc`, and the folder of the same name.
+Scoped to the spec: `<spec-slug>-001`, `-002`. Continue from the highest number
+for that slug by globbing file **names** (never content) in
+`docs/tasks/<spec-slug>/` and `docs/archive/tasks/<spec-slug>/`. Numbers are
+never reused. Ad-hoc: slug and folder `adhoc`.
 
 ## 4. Write
 
-Tasks are filed by the spec that defines them: one folder per spec, named after
-its slug, and one file per task inside it, at
-`docs/tasks/<spec-slug>/<id>-<short-name>.md`. The folder is the spec's
-file name without `.md`, so `docs/specs/learner-suspension.md` owns
-`docs/tasks/learner-suspension/`. Ad-hoc tasks go in
-`docs/tasks/adhoc/`.
-
-The folder answers "what is left of this feature" with a `glob`, and it is why
-the slug is permanent: renaming a spec would orphan its folder along with its
-ids.
+One file per task: `docs/tasks/<spec-slug>/<id>-<short-name>.md` (folder = spec
+file name without `.md`; ad-hoc in `docs/tasks/adhoc/`).
 
 ```markdown
 ---
@@ -99,57 +71,31 @@ Constraints: <each rule from the spec that binds these covers, verbatim>
 Decisions: <docs/reference/adr/<file>.md — one line on what it settles for this task>
 ```
 
-Copy the criteria word for word. Do not reword them: the spec is the contract.
+Copy criteria verbatim.
 
-**The task must stand alone.** `/implement` cannot read `docs/specs/`: the
-permission is denied, not merely discouraged. You are holding the spec open
-right now, for the two to six tasks you are about to write, so transcribe here
-everything those tasks will need from it. Whatever you leave behind is lost to
-the implementer, and it comes back to you as a blocked task.
+**The task must stand alone**: `/implement` cannot read `docs/specs/`, so
+transcribe everything the task needs from the spec. Omit `Constraints` and
+`Decisions` when nothing binds the task.
 
-That is also why it is cheap: the spec is read once, by you, instead of once per
-task by an agent that would have to reread it every time.
+Each criterion names its proof: a test run by `verify`, or `manual`. Neither
+means rewrite it.
 
-Drop the `Constraints` and `Decisions` lines when the spec has nothing that
-binds this task. An empty label is noise the implementer still pays for.
+`verify` is the project's test command narrowed to the task (`npm test -- auth`).
+With no test runner, first try any command that exits non-zero when the change
+is wrong (linter, type check, build, grep script). If none, set `verify: manual`
+and report in these words: **this task will close on a human yes, with no exit
+code behind it.**
 
-Each criterion names how it is proven: a test that `verify` runs, or `manual`
-when nothing can prove it automatically. A criterion with neither is not a
-criterion, rewrite it.
+`checks` drives `/done`. Add `e2e` for user-journey criteria. Add `pentest`
+when the task opens an endpoint, auth path, upload or external input.
 
-`verify` is the project's test command narrowed to this task, for example
-`npm test -- auth`.
+`--adhoc`: no `spec`, no `covers`, one goal, at most two criteria; more means
+it needs a spec: say so and STOP. Choose `checks` and say which in the report:
+- `[]` when `verify` proves the change and no new surface opens (typo, version
+  bump, copy, missing test): the fast lane.
+- `[review]` for anything that changes behavior.
 
-If the project has no test runner, set `verify: manual` and say so in the
-report, in those words: **this task will close on a human yes, with no exit code
-behind it.** That is the workflow running without its only non-negotiable gate,
-and it is worth one more attempt at a real command first — a linter, a type
-check, a build, a script that greps for the thing. Anything that exits non-zero
-when the change is wrong beats a confirmation, however narrow it is.
-
-`checks` drives what `/done` runs. Add `e2e` when the criteria describe a user
-journey. Add `pentest` when the task opens a new endpoint, an auth path, an
-upload, or any external input.
-
-For `--adhoc`: no `spec`, no `covers`, and one goal with at most two criteria.
-If it needs more, it deserves a spec: say so and STOP.
-
-Choose its `checks` rather than defaulting them, and say which you chose in the
-report:
-
-- `checks: []` when `verify` proves the change on its own and the change opens
-  no new surface: a typo, a version bump, a copy change, a test that was
-  missing. `/done` then runs the test command, merges and archives, and costs
-  almost nothing. This is the fast lane, and it is the reason `--adhoc` exists.
-- `checks: [review]` for anything that changes behavior, however small.
-
-An empty `checks` is a decision, not a shortcut, and this is where it is taken:
-with the change still unwritten, by whoever is scoping it. Taken at `/done`
-time it would be taken by the session that just wrote the code, under pressure
-to merge, which is the one moment nobody should be trusted with it.
-
-Then set the spec's frontmatter to `status: active`: its folder now holds a task.
-An `--adhoc` task has no spec, and nothing to set.
+Then set the spec's frontmatter to `status: active` (not for ad-hoc).
 
 ## 5. Report and stop
 
@@ -158,10 +104,7 @@ Coverage: <n>/<n> unticked criteria <, <m> already delivered>
 Manual criteria: <count>
 Next: review them, then run /implement
 
-Then regenerate `docs/workflow/status.md` as defined in `/status` and commit it, the
-tasks and the spec's status on `main` with the message `tasks: <spec-slug>`.
-
-The commit comes before your review, not after, and the report says so: the
-tasks are on `main` so that any session can see them, which is the workflow's
-own rule. Review them as committed files and edit them in place — a bad split
-is a commit to amend, not work to redo. Nothing reads them until `/implement`.
+Regenerate `docs/workflow/status.md` as defined in `/status`, and commit it, the
+tasks and the spec status on `main` with `tasks: <spec-slug>`. The commit
+precedes the review and the report says so: review the committed files and
+edit in place.

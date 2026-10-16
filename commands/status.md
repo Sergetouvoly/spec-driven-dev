@@ -4,79 +4,49 @@ description: Regenerate and show where the project stands, for a fresh session
 
 # /status
 
-`docs/workflow/status.md` is derived, never edited by hand. This command rebuilds it from
-the filesystem and git, so it cannot drift. Any command that moves a task
-regenerates it by running this definition.
+`docs/workflow/status.md` is derived, never hand-edited. This command rebuilds
+it from the filesystem and git. Any command that moves a task runs this
+definition.
 
 ## 1. Guard
 
-Everything under `docs/` lives on `main`. A status built on a feature branch
-describes one branch, not the project.
+Off `main`, read `main` and write nothing:
+- list tasks with `git ls-tree -r --name-only main docs/tasks/` and read each
+  with `git show main:<path>` (not `glob`, not the working tree).
+- do not overwrite `docs/workflow/status.md`; print the status and say it was
+  built from `main` and not saved.
 
-So off `main`, this command reads `main` and writes nothing:
-
-- list the tasks with `git ls-tree -r --name-only main docs/tasks/`,
-  and
-  read each one with `git show main:<path>`. Not `glob`, not the working tree:
-  a feature branch may carry a task file that is not yet on `main`, or an
-  edited copy of one that is, and either would make the status describe the
-  branch.
-- do not overwrite `docs/workflow/status.md`. Print the generated status to the user and
-  say it was built from `main` and not saved. Writing it here would commit a
-  description of the project into a branch that holds one task, and the next
-  merge would carry that snapshot onto `main` as if it were current.
-
-On `main`, read the working tree and write the file as described below.
+On `main`, read the working tree and write the file.
 
 ## 2. Gather
 
-On `main`, by `glob`. Off `main`, by `git ls-tree`/`git show` as in section 1 —
-same list, different source.
+On `main` by `glob`; off `main` by `git ls-tree`/`git show`.
 
-- the tasks in `docs/tasks/*/`, one folder per spec slug plus `adhoc/`,
-  and each frontmatter. A spec has an active task exactly when its folder
-  holds a file
-- for each, does its branch exist (`git rev-parse --verify <branch>`), and how
-  many commits it holds that `main` does not
-  (`git rev-list --count main..<branch>`). Not `git log`: the count is all this
-  file needs, and `git log -p` prints file contents from any revision, which is
-  how an agent denied the archive would read it anyway
-- which of them carry `merged: true`: their code is in, only the archive is
-  left. A pull request merged on the host leaves exactly this, and nothing else
-  would ever mention it again
-- `git rev-parse --abbrev-ref HEAD` and `git status --porcelain`
+- Tasks in `docs/tasks/*/` (one folder per spec slug, plus `adhoc/`) and their
+  frontmatter. A spec has an active task iff its folder holds a file.
+- Per task: does its branch exist (`git rev-parse --verify <branch>`), and
+  `git rev-list --count main..<branch>` (never `git log`).
+- Which carry `merged: true` (code in, archive left).
+- `git rev-parse --abbrev-ref HEAD` and `git status --porcelain`.
+- Specs in `docs/specs/`: frontmatter `status` and ticked count of
+  `## Acceptance criteria`. `~~` struck criteria are withdrawn: excluded from
+  ticked, pending and total.
 
-- the specs in `docs/specs/`, and for each, its frontmatter `status` and how
-  many of its `## Acceptance criteria` are ticked. A criterion struck through
-  with `~~` is withdrawn: it counts as neither ticked nor pending, and drops out
-  of the total. Specs are never archived, so `docs/specs/` holds every feature
-  the product has ever promised, and the ticks are what separate the delivered
-  ones from the live work.
+  Recompute each status by the `specs` skill table. Ticks win: if missing or
+  wrong, rewrite it (on `main` only) and list as `Status fixed`; off `main`,
+  list only. Then:
+  - `draft`, no tick: never started → `Needs a decision`.
+  - `draft`, some ticks: stalled half-built → `Needs a decision` with criteria
+    left.
+  - `active`: already under `In progress`/`Next up`.
+  - `done`: counters only.
+- Specs with an unresolved `[Question]`.
 
-  Recompute each status by the table in the `specs` skill and compare. The
-  ticks win: a spec whose `status` is missing or disagrees gets it rewritten, on
-  `main` only, and listed as `Status fixed` in what you print. Off `main`, list
-  it and write nothing. A wrong status is a stale cache, not a decision, and it
-  is what the next `grep` would believe.
-
-  Then, by the recomputed status:
-  - `draft` with no tick: never started. That is a backlog item nobody decided
-    on, and it goes under `Needs a decision`.
-  - `draft` with some ticks: **stalled half-built**, which is the worst state a
-    feature can be in and the one nothing else would report. It goes under
-    `Needs a decision` with the count of criteria left.
-  - `active`: in flight. Its tasks already appear under `In progress` or
-    `Next up`.
-  - `done`: delivered. It contributes to the counters and is named nowhere
-    else, because a finished feature is not current state.
-- the specs carrying an unresolved `[Question]`
-
-Never read `docs/archive/`. Counts come from filenames, not content.
+Never read `docs/archive/`; counts come from filenames.
 
 ## 3. Write
 
-Overwrite `docs/workflow/status.md` with exactly this shape. Keep it under 20 lines: it
-is read at the start of every session, so every line costs tokens forever.
+Overwrite `docs/workflow/status.md` in this shape, under 20 lines:
 
 ```markdown
 # Status
@@ -99,18 +69,12 @@ Updated: <YYYY-MM-DD>
 Active: <n> | Started: <n> | Archived: <n> | Features: <n>/<n> delivered
 ```
 
-`Started` counts active tasks whose branch already holds commits. A task started
-and left is the thing a fresh session most needs to see, and the thing it is
-most likely to redo from scratch.
-
-List at most three tasks under `Next up`, the lowest-numbered not-yet-started
-task of each folder first, so every feature in flight shows its next step. Drop empty sections, and never list
-archived tasks: git holds that history.
+`Started` = active tasks whose branch holds commits. `Next up`: at most three,
+the lowest-numbered not-started task of each folder first. Drop empty sections;
+never list archived tasks.
 
 ## 4. Show
 
-Print the file, then one `Status fixed: <path> <old> -> <new>` line per spec
-whose status you rewrote. Nothing else.
-
-The fixes are not committed here, like `status.md` itself: the next command
-that commits on `main` carries them.
+Print the file, then one `Status fixed: <path> <old> -> <new>` line per rewrite.
+Nothing else. Fixes are not committed here; the next commit on `main` carries
+them.
